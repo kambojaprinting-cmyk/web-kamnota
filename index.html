@@ -275,53 +275,76 @@
             }
         });
 
-        async function loadInvoiceTerakhirAndExecute() {
-            try {
-                const response = await fetch(`${URL_WEB_APP}?action=getAllInvoices`);
-                const result = await response.json();
-                
-                if (result.status === "SUCCESS" && result.data && result.data.length > 0) {
-                    const lastInvoice = result.data[result.data.length - 1];
-                    
-                    if (lastInvoice.invNumber) document.getElementById('invNumber').value = lastInvoice.invNumber;
-                    if (lastInvoice.custName) document.getElementById('custName').value = lastInvoice.custName;
-                    if (lastInvoice.invDate) document.getElementById('invDate').value = lastInvoice.invDate;
-                    
-                    if (lastInvoice.dp && document.getElementById('dpAmount')) {
-                        document.getElementById('dpAmount').value = lastInvoice.dp;
-                    }
-
-                    if (lastInvoice.item && lastInvoice.item.includes('#')) {
-                        const parts = lastInvoice.item.split('#');
-                        const desc = parts[0] || "";
-                        const qty = parts[1] || "1";
-                        const price = parts[2] || "0";
-
-                        let firstRowKwitansi = document.querySelector('#itemsBody tr');
-                        if (firstRowKwitansi) {
-                            let descInput = firstRowKwitansi.querySelector('.desc-input');
-                            let qtyInput = firstRowKwitansi.querySelector('.qty-input');
-                            let priceInput = firstRowKwitansi.querySelector('.price-input');
-
-                            if (descInput) descInput.value = desc;
-                            if (qtyInput) qtyInput.value = qty;
-                            if (priceInput) priceInput.value = price;
-                        }
-                    }
-
-                    if (typeof calculate === 'function') calculate();
-                    if (typeof formatDPAndCalculate === 'function') formatDPAndCalculate();
-
-                    setTimeout(() => {
-                        const btnShare = document.getElementById('btnShare');
-                        if (btnShare) btnShare.click();
-                    }, 500);
-                }
-            } catch (err) {
-                console.error("Gagal autoRun:", err);
+        // FUNGSI PERBAIKAN TOTAL UNTUK AUTO-RUN
+async function loadInvoiceTerakhirAndExecute() {
+    try {
+        const response = await fetch(`${URL_WEB_APP}?action=getAllInvoices`);
+        const result = await response.json();
+        
+        if (result.status === "SUCCESS" && result.data && result.data.length > 0) {
+            const lastInvoice = result.data[result.data.length - 1];
+            
+            // 1. Isi Header
+            if (lastInvoice.invNumber) document.getElementById('invNumber').value = lastInvoice.invNumber;
+            if (lastInvoice.custName) document.getElementById('custName').value = lastInvoice.custName;
+            if (lastInvoice.invDate) document.getElementById('invDate').value = lastInvoice.invDate;
+            
+            if (lastInvoice.dp && document.getElementById('dpAmount')) {
+                document.getElementById('dpAmount').value = lastInvoice.dp;
             }
-        }
 
+            // 2. Breakdown Item (Format: NamaBarang#Qty#Harga)
+            if (lastInvoice.item && lastInvoice.item.includes('#')) {
+                const parts = lastInvoice.item.split('#');
+                const desc = parts[0] || "";
+                const qty = parts[1] || "1";
+                const price = parts[2] || "0";
+
+                // A. ISI TABEL KWITANSI (FORM UTAMA)
+                let firstRowKwitansi = document.querySelector('#itemsBody tr');
+                if (firstRowKwitansi) {
+                    let descInput = firstRowKwitansi.querySelector('.desc-input');
+                    let qtyInput = firstRowKwitansi.querySelector('.qty-input');
+                    let priceInput = firstRowKwitansi.querySelector('.price-input');
+
+                    if (descInput) descInput.value = desc;
+                    if (qtyInput) qtyInput.value = qty;
+                    if (priceInput) priceInput.value = price;
+                }
+
+                // B. ISI LANGSUNG TABEL INVOICE (TEMPLATE TERSEMBUNYI)
+                let firstRowInvoice = document.querySelector('#invTargetItemsBody tr');
+                if (firstRowInvoice) {
+                    let targetDesc = firstRowInvoice.querySelector('.target-desc');
+                    let targetQty = firstRowInvoice.querySelector('.target-qty');
+                    let targetPrice = firstRowInvoice.querySelector('.target-price');
+                    let targetTotal = firstRowInvoice.querySelector('.target-total');
+
+                    const valPrice = parseFloat(price) || 0;
+                    const valQty = parseFloat(qty) || 1;
+                    const subtotal = valQty * valPrice;
+
+                    if (targetDesc) targetDesc.innerText = desc;
+                    if (targetQty) targetQty.innerText = qty;
+                    if (targetPrice) targetPrice.innerText = valPrice > 0 ? valPrice.toLocaleString('id-ID') : "";
+                    if (targetTotal) targetTotal.innerText = subtotal > 0 ? subtotal.toLocaleString('id-ID') : "0";
+                }
+            }
+
+            // 3. Pemicu Kalkulasi Matematika
+            if (typeof calculate === 'function') calculate();
+            if (typeof formatDPAndCalculate === 'function') formatDPAndCalculate();
+
+            // 4. Beri jeda 800ms agar DOM & HTML2Canvas sempat membaca teks sebelum di-render
+            setTimeout(() => {
+                const btnShare = document.getElementById('btnShare');
+                if (btnShare) btnShare.click();
+            }, 800);
+        }
+    } catch (err) {
+        console.error("Gagal memuat data dari API Apps Script:", err);
+    }
+}
         function calculate() {
             let rows = document.querySelectorAll('#itemsBody tr');
             let total = 0;
