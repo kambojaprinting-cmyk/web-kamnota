@@ -166,7 +166,7 @@
     </div>
 
     <!-- ======================================================== -->
-    <!-- 2. TEMPLATE INVOICE TERSEMBUNYI (STRUKTUR METADATA TABEL)  -->
+    <!-- 2. TEMPLATE INVOICE TERSEMBUNYI (LEBAR KOLOM DIMEPETKAN)   -->
     <!-- ======================================================== -->
     <div id="renderInvoiceWrapper">
         <div id="invoiceCard" class="form-card p-6 shadow-lg border border-gray-200" 
@@ -186,19 +186,19 @@
                 INVOICE
             </div>
             
-            <!-- SOLUSI UTAMA: Menggunakan tabel presisi untuk area Nama s/d Tanggal -->
+            <!-- REVISI PRESISI: Lebar Kolom Label Dikurangi Menjadi 75px & Padding Rapat -->
             <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 12px; color: #000000 !important;">
                 <tr>
-                    <td style="width: 95px; padding: 0.5px 0; vertical-align: middle; color: #000000;">Kepada Yth :</td>
-                    <td id="invTargetCustName" style="font-weight: bold; padding: 0.5px 0; vertical-align: middle; color: #000000;"></td>
+                    <td style="width: 75px !important; padding: 0.5px 0; vertical-align: middle; color: #000000;">Kepada Yth :</td>
+                    <td id="invTargetCustName" style="font-weight: bold; padding: 0.5px 0 0.5px 4px; vertical-align: middle; color: #000000;"></td>
                 </tr>
                 <tr>
-                    <td style="padding: 0.5px 0; vertical-align: middle; color: #000000;">Invoice no :</td>
-                    <td id="invTargetInvNumber" style="font-weight: bold; padding: 0.5px 0; vertical-align: middle; color: #000000;"></td>
+                    <td style="width: 75px !important; padding: 0.5px 0; vertical-align: middle; color: #000000;">Invoice no :</td>
+                    <td id="invTargetInvNumber" style="font-weight: bold; padding: 0.5px 0 0.5px 4px; vertical-align: middle; color: #000000;"></td>
                 </tr>
                 <tr>
-                    <td style="padding: 0.5px 0; vertical-align: middle; color: #000000;">Tanggal :</td>
-                    <td id="invTargetInvDate" style="font-weight: bold; padding: 0.5px 0; vertical-align: middle; color: #000000;"></td>
+                    <td style="width: 75px !important; padding: 0.5px 0; vertical-align: middle; color: #000000;">Tanggal :</td>
+                    <td id="invTargetInvDate" style="font-weight: bold; padding: 0.5px 0 0.5px 4px; vertical-align: middle; color: #000000;"></td>
                 </tr>
             </table>
 
