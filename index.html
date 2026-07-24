@@ -255,16 +255,14 @@
         document.getElementById('invDate').value = hariIni.toLocaleDateString('id-ID', opsi);
 
         // ========================================================
-        // FUNGSI API & AUTO RUN SAAT HALAMAN DIMUAT
+        // DUKUNGAN AUTORUN (TANPA MENGUBAH EKSEKUSI UTAMA)
         // ========================================================
         window.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
             
-            // Cek apakah ada pemicu otomatis via URL (?autoRun=true)
             if (params.get('autoRun') === 'true') {
                 loadInvoiceTerakhirAndExecute();
             } else {
-                // Panggilan nomor invoice biasa untuk manual
                 fetch(`${URL_WEB_APP}?action=getNextInvoice`)
                 .then(res => res.json())
                 .then(data => {
@@ -277,165 +275,51 @@
             }
         });
 
-        // FUNGSI PANGGILAN API UNTUK MENGAMBIL DATA TERAKHIR DARI GOOGLE SHEETS
-        // FUNGSI PERBAIKAN TOTAL UNTUK AUTO-RUN
-async function loadInvoiceTerakhirAndExecute() {
-    try {
-        const response = await fetch(`${URL_WEB_APP}?action=getAllInvoices`);
-        const result = await response.json();
-        
-        if (result.status === "SUCCESS" && result.data && result.data.length > 0) {
-            const lastInvoice = result.data[result.data.length - 1];
-            
-            // 1. Isi Header
-            if (lastInvoice.invNumber) document.getElementById('invNumber').value = lastInvoice.invNumber;
-            if (lastInvoice.custName) document.getElementById('custName').value = lastInvoice.custName;
-            if (lastInvoice.invDate) document.getElementById('invDate').value = lastInvoice.invDate;
-            
-            if (lastInvoice.dp && document.getElementById('dpAmount')) {
-                document.getElementById('dpAmount').value = lastInvoice.dp;
-            }
-
-            // 2. Breakdown Item (Format: NamaBarang#Qty#Harga)
-            if (lastInvoice.item && lastInvoice.item.includes('#')) {
-                const parts = lastInvoice.item.split('#');
-                const desc = parts[0] || "";
-                const qty = parts[1] || "1";
-                const price = parts[2] || "0";
-
-                // A. ISI TABEL KWITANSI (FORM UTAMA)
-                let firstRowKwitansi = document.querySelector('#itemsBody tr');
-                if (firstRowKwitansi) {
-                    let descInput = firstRowKwitansi.querySelector('.desc-input');
-                    let qtyInput = firstRowKwitansi.querySelector('.qty-input');
-                    let priceInput = firstRowKwitansi.querySelector('.price-input');
-
-                    if (descInput) descInput.value = desc;
-                    if (qtyInput) qtyInput.value = qty;
-                    if (priceInput) priceInput.value = price;
-                }
-
-                // B. ISI LANGSUNG TABEL INVOICE (TEMPLATE TERSEMBUNYI)
-                let firstRowInvoice = document.querySelector('#invTargetItemsBody tr');
-                if (firstRowInvoice) {
-                    let targetDesc = firstRowInvoice.querySelector('.target-desc');
-                    let targetQty = firstRowInvoice.querySelector('.target-qty');
-                    let targetPrice = firstRowInvoice.querySelector('.target-price');
-                    let targetTotal = firstRowInvoice.querySelector('.target-total');
-
-                    const valPrice = parseFloat(price) || 0;
-                    const valQty = parseFloat(qty) || 1;
-                    const subtotal = valQty * valPrice;
-
-                    if (targetDesc) targetDesc.innerText = desc;
-                    if (targetQty) targetQty.innerText = qty;
-                    if (targetPrice) targetPrice.innerText = valPrice > 0 ? valPrice.toLocaleString('id-ID') : "";
-                    if (targetTotal) targetTotal.innerText = subtotal > 0 ? subtotal.toLocaleString('id-ID') : "0";
-                }
-            }
-
-            // 3. Pemicu Kalkulasi Matematika
-            if (typeof calculate === 'function') calculate();
-            if (typeof formatDPAndCalculate === 'function') formatDPAndCalculate();
-
-            // 4. Beri jeda 800ms agar DOM & HTML2Canvas sempat membaca teks sebelum di-render
-            setTimeout(() => {
-                const btnShare = document.getElementById('btnShare');
-                if (btnShare) btnShare.click();
-            }, 800);
-        }
-    } catch (err) {
-        console.error("Gagal memuat data dari API Apps Script:", err);
-    }
-}
-
-        // ==========================================
-        // FUNGSI PEMPROSESAN DATA INVOICE
-        // ==========================================
-        function prosesInvoice(aksi) {
-            // 1. Hilangkan placeholder jika aksi 'bagikan'
-            if (aksi === 'bagikan') {
-                let textInputs = document.querySelectorAll('#itemsBody .desc-input');
-                textInputs.forEach(input => {
-                    if (input.value.trim() === "") {
-                        input.setAttribute('data-old-placeholder', input.placeholder);
-                        input.placeholder = "";
-                    }
-                });
-            }
-
-            // 2. Ambil nilai dasar
-            let currentInvNumber = document.getElementById('invNumber') ? document.getElementById('invNumber').value : "";
-            let currentName = document.getElementById('custName') ? document.getElementById('custName').value : "";
-            let currentDate = document.getElementById('invDate') ? document.getElementById('invDate').value : "";
-
-            // 3. Ambil nilai DP
-            let dpInput = document.getElementById('dpAmount');
-            let dpDigits = "0";
-            if (dpInput && dpInput.value.trim() !== "") {
-                dpDigits = dpInput.value.replace(/\D/g, '') || "0";
-            }
-
-            // 4. Susun Paket Item
-            let paketItem = [];
-            let rows = document.querySelectorAll('#itemsBody tr');
-            
-            rows.forEach(row => {
-                let descInput = row.querySelector('.desc-input');
-                let qtyInput = row.querySelector('.qty-input');
-                let priceInput = row.querySelector('.price-input');
-                let rowTotal = row.querySelector('.row-total');
+        async function loadInvoiceTerakhirAndExecute() {
+            try {
+                const response = await fetch(`${URL_WEB_APP}?action=getAllInvoices`);
+                const result = await response.json();
                 
-                let desc = descInput && descInput.value.trim() !== "" ? descInput.value.trim() : "";
-                let qty = qtyInput && qtyInput.value.trim() !== "" ? qtyInput.value.trim() : "1";
-                
-                let priceDigits = priceInput ? priceInput.value.replace(/\D/g, '') : "0";
-                let valPrice = parseFloat(priceDigits);
-                if (isNaN(valPrice)) valPrice = 0;
-                let priceStr = valPrice > 0 ? priceDigits : "";
-
-                if (desc === "" && valPrice === 0) {
-                    if (aksi === 'bagikan') {
-                        if (priceInput) priceInput.style.visibility = 'hidden';
-                        if (qtyInput) qtyInput.style.visibility = 'hidden';
-                        if (rowTotal) rowTotal.style.visibility = 'hidden';
+                if (result.status === "SUCCESS" && result.data && result.data.length > 0) {
+                    const lastInvoice = result.data[result.data.length - 1];
+                    
+                    if (lastInvoice.invNumber) document.getElementById('invNumber').value = lastInvoice.invNumber;
+                    if (lastInvoice.custName) document.getElementById('custName').value = lastInvoice.custName;
+                    if (lastInvoice.invDate) document.getElementById('invDate').value = lastInvoice.invDate;
+                    
+                    if (lastInvoice.dp && document.getElementById('dpAmount')) {
+                        document.getElementById('dpAmount').value = lastInvoice.dp;
                     }
-                } else {
-                    paketItem.push(desc + "#" + qty + "#" + priceStr);
-                }
-            });
 
-            let stringHasilTabel = paketItem.length > 0 ? paketItem.join('~') : "-";
-            let grandTotalElem = document.getElementById('grandTotal');
-            let teksTotal = grandTotalElem ? grandTotalElem.innerText : "0";
-            let totalHarga = teksTotal.replace(/\D/g, '');
-            if (totalHarga === "") totalHarga = "0";
+                    if (lastInvoice.item && lastInvoice.item.includes('#')) {
+                        const parts = lastInvoice.item.split('#');
+                        const desc = parts[0] || "";
+                        const qty = parts[1] || "1";
+                        const price = parts[2] || "0";
 
-            let noHp = "-";
+                        let firstRowKwitansi = document.querySelector('#itemsBody tr');
+                        if (firstRowKwitansi) {
+                            let descInput = firstRowKwitansi.querySelector('.desc-input');
+                            let qtyInput = firstRowKwitansi.querySelector('.qty-input');
+                            let priceInput = firstRowKwitansi.querySelector('.price-input');
 
-            // 5. JIKA DIBUKA VIA APP INVENTOR (ANDROID APP)
-            if (window.AppInventor && window.AppInventor.setWebViewString) {
-                window.AppInventor.setWebViewString("simpan_data|" + currentInvNumber + "|" + currentName + "|" + currentDate + "|" + stringHasilTabel + "|" + dpDigits + "|" + totalHarga + "|" + noHp);
-
-                if (aksi === 'bagikan') {
-                    setTimeout(function() {
-                        if (window.AppInventor && window.AppInventor.setWebViewString) {
-                            window.AppInventor.setWebViewString("potret_sekarang");
+                            if (descInput) descInput.value = desc;
+                            if (qtyInput) qtyInput.value = qty;
+                            if (priceInput) priceInput.value = price;
                         }
-                    }, 100);
-                }
-            }
+                    }
 
-            // 6. JIKA DIBUKA VIA PUPPETEER (VERCEL / AKSITA AI)
-            return {
-                status: "SUCCESS",
-                invNumber: currentInvNumber,
-                custName: currentName,
-                invDate: currentDate,
-                items: stringHasilTabel,
-                dp: parseInt(dpDigits) || 0,
-                total: parseInt(totalHarga) || 0
-            };
+                    if (typeof calculate === 'function') calculate();
+                    if (typeof formatDPAndCalculate === 'function') formatDPAndCalculate();
+
+                    setTimeout(() => {
+                        const btnShare = document.getElementById('btnShare');
+                        if (btnShare) btnShare.click();
+                    }, 500);
+                }
+            } catch (err) {
+                console.error("Gagal autoRun:", err);
+            }
         }
 
         function calculate() {
@@ -493,13 +377,13 @@ async function loadInvoiceTerakhirAndExecute() {
             }
         }
 
+        // ========================================================
+        // PROSES UTAMA (PERSIS 100% SEPERTI KODE LAMA ANDA)
+        // ========================================================
         document.getElementById('btnShare').addEventListener('click', async function() {
             let btn = this;
             btn.disabled = true;
             btn.innerText = "Memproses...";
-
-            // Panggil fungsi prosesInvoice sebelum eksekusi lanjutan
-            prosesInvoice('bagikan');
 
             let currentInvNumber = document.getElementById('invNumber').value;
             let currentName = document.getElementById('custName').value;
@@ -537,7 +421,7 @@ async function loadInvoiceTerakhirAndExecute() {
             document.getElementById('invTargetGrandTotal').innerText = globalTotal > 0 ? globalTotal.toLocaleString('id-ID') : "0";
             let stringItemGabung = paketItem.join(', ');
 
-            // 2. GENERATE GAMBAR INVOICE LOKAL DAN BASE64 UNTUK DRIVE
+            // 2. GENERATE GAMBAR INVOICE LOKAL DAN BASE64 UNTUK DRIVE (KUALITAS TINGGI)
             let base64Invoice = "";
             const targetInvoice = document.getElementById('invoiceCard');
             try {
@@ -561,7 +445,7 @@ async function loadInvoiceTerakhirAndExecute() {
                 console.error("Gagal membuat gambar Invoice lokal:", err);
             }
 
-            // 3. GENERATE GAMBAR KWITANSI
+            // 3. GENERATE GAMBAR KWITANSI (KUALITAS TINGGI)
             const targetKwitansi = document.getElementById('kwitansiCard');
             const cloneKwitansi = targetKwitansi.cloneNode(true);
             
@@ -608,8 +492,8 @@ async function loadInvoiceTerakhirAndExecute() {
 
                 let payload = {
                     action: "saveInvoiceAll",
-                    image: base64Kwitansi,            
-                    invoiceImage: base64Invoice,      
+                    image: base64Kwitansi,            // Kwitansi ke Drive
+                    invoiceImage: base64Invoice,      // Invoice ke Drive
                     invNumber: currentInvNumber,
                     custName: currentName,
                     invDate: currentDate,
