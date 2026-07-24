@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generator Kwitansi Kamboja</title>
+    <title>Generator Kwitansi & Invoice Kamboja</title>
     <meta name="color-scheme" content="light">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -16,7 +16,7 @@
             flex-direction: column;
             min-height: 100vh;
         }
-        #invoice { 
+        .form-card { 
             color: #000000 !important; 
             width: 4.66in !important;
             height: 7.10in !important;
@@ -48,12 +48,24 @@
             pointer-events: none; 
             z-index: 40;
         }
+
+        /* Container Tersembunyi untuk Render Invoice */
+        #renderInvoiceWrapper {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+            width: 4.66in;
+            height: 7.10in;
+        }
     </style>
 </head>
 <body class="p-4">
 
-    <div id="invoice" class="mx-auto p-5 shadow-lg border border-gray-200 class-invoice" 
-     style="background-image: url('https://i.postimg.cc/dQXdj1LF/Latar-Kwitansi-Kamboja.jpg') !important; background-size: cover !important; background-position: center !important; position: relative;">
+    <!-- ========================================== -->
+    <!-- 1. FORM KWITANSI (TAMPIL DI LAYAR UTAMA)  -->
+    <!-- ========================================== -->
+    <div id="kwitansiCard" class="form-card mx-auto p-5 shadow-lg border border-gray-200" 
+         style="background-image: url('https://i.postimg.cc/dQXdj1LF/Latar-Kwitansi-Kamboja.jpg') !important; background-size: cover !important; background-position: center !important; position: relative;">
         
         <div id="stempelLunas" class="hidden">LUNAS</div>
 
@@ -102,7 +114,6 @@
                 </tr>
             </thead>
             <tbody id="itemsBody">
-                <!-- Baris 1 - 5 -->
                 <script>
                     for(let i=1; i<=5; i++) {
                         document.write(`
@@ -154,8 +165,82 @@
         </button>
     </div>
 
-    <!-- Iframe tersembunyi untuk merender invoice.html -->
-    <iframe id="iframeInvoice" src="invoice.html" style="position: absolute; left: -9999px; top: -9999px; width: 800px; height: 1200px;"></iframe>
+    <!-- ======================================================== -->
+    <!-- 2. TEMPLATE INVOICE TERSEMBUNYI (UNTUK RENDER UNDUHAN)    -->
+    <!-- ======================================================== -->
+    <div id="renderInvoiceWrapper">
+        <div id="invoiceCard" class="form-card p-6 shadow-lg border border-gray-200" 
+             style="background-image: url('https://i.postimg.cc/qBYnxRzT/Latar-Invoice-Kamboja.jpg') !important; background-size: cover !important; background-position: center !important; color: #000000 !important; position: relative;">
+            
+            <div class="flex items-center gap-4 mb-6">
+                <img src="https://i.postimg.cc/7Pc7n6fD/LOGO-KAMBOJA.png" alt="Logo Kamboja" class="w-16 h-16 object-contain">
+                <div>
+                    <h1 class="font-bold text-lg" style="color: #000000 !important;">KAMBOJA Printing</h1>
+                    <p class="text-xs" style="color: #000000 !important;">Jl. Tanjungpura Gang Kamboja Kios No. 3 Pontianak - Kalbar</p>
+                    <p class="text-xs font-bold" style="color: #000000 !important;">HP/WA : 0895-1588-1309</p>
+                </div>
+            </div>
+
+            <div class="p-2 mb-4 text-right font-bold uppercase tracking-wider text-white" 
+                 style="background-color: #1f2937 !important;">
+                INVOICE
+            </div>
+            
+            <div class="text-xs mb-4" style="color: #000000 !important;">
+                <div class="flex items-center gap-1 mb-1">
+                    <span class="w-24 text-black">Kepada Yth :</span>
+                    <span id="invTargetCustName" class="font-bold text-black border-b border-gray-300 flex-1 min-h-[18px]"></span>
+                </div>
+                <div class="flex items-center gap-1 mb-1">
+                    <span class="w-24 text-black">Invoice no :</span>
+                    <span id="invTargetInvNumber" class="font-bold text-black border-b border-gray-300 flex-1 min-h-[18px]"></span>
+                </div>
+                <div class="flex items-center gap-1">
+                    <span class="w-24 text-black">Tanggal :</span>
+                    <span id="invTargetInvDate" class="font-bold text-black border-b border-gray-300 flex-1 min-h-[18px]"></span>
+                </div>
+            </div>
+
+            <table class="w-full text-xs mb-6 border-collapse table-fixed">
+                <thead>
+                    <tr style="background-color: rgba(229, 231, 235, 0.8) !important; backdrop-filter: blur(1px);">
+                        <th class="p-1 text-center w-[6%]" style="color: #000000 !important;">No.</th>
+                        <th class="p-1 text-left w-[42%]" style="color: #000000 !important;">Deskripsi</th>
+                        <th class="p-1 text-center w-[12%]" style="color: #000000 !important;">Qty</th>
+                        <th class="p-1 text-right w-[18%]" style="color: #000000 !important;">Harga</th>
+                        <th class="p-1 text-right w-[22%]" style="color: #000000 !important;">Total</th>
+                    </tr>
+                </thead>
+                <tbody id="invTargetItemsBody">
+                    <script>
+                        for(let i=1; i<=5; i++) {
+                            document.write(`
+                            <tr style="height: 28px;">
+                                <td class="p-1 border-b text-center row-no" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;">${i}.</td>
+                                <td class="p-1 border-b target-desc" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;"></td>
+                                <td class="p-1 border-b text-center target-qty" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;"></td>
+                                <td class="p-1 border-b text-right target-price" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;"></td>
+                                <td class="p-1 border-b text-right target-total" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;">0</td>
+                            </tr>
+                            `);
+                        }
+                    </script>
+                </tbody>
+            </table>
+
+            <div class="flex justify-end gap-4 font-bold text-sm mb-8" style="color: #000000 !important;">
+                <span>TOTAL</span>
+                <span id="invTargetGrandTotal" style="color: #000000 !important;">0</span>
+            </div>
+
+            <p class="font-bold" style="color: #000000 !important; font-size: 10px;">ORDER DIPROSES SETELAH PEMBAYARAN DITERIMA</p>
+            <div class="mt-8 text-right text-xs" style="color: #000000 !important;">
+                <p style="color: #000000 !important;">Hormat Kami,</p>
+                <br><br>
+                <p class="font-bold" style="color: #000000 !important;">KAMBOJA PRINTING</p>
+            </div>
+        </div>
+    </div>
 
 <script>
         const URL_WEB_APP = "https://script.google.com/macros/s/AKfycby9daU4NZrFOwAmhPjPw_z0TCpFGKI-pvfaHnsmUabBvI3gdfv_rqy-Y6F02w0q9Yo/exec";
@@ -235,6 +320,7 @@
             }
         }
 
+        // FUNGSI UTAMA: PROSES KWITANSI & INVOICE
         document.getElementById('btnShare').addEventListener('click', async function() {
             let btn = this;
             btn.disabled = true;
@@ -244,50 +330,70 @@
             let currentName = document.getElementById('custName').value;
             let currentDate = document.getElementById('invDate').value;
 
-            // 1. KUMPULKAN DATA DARI TABEL
-            let itemsArray = [];
+            // 1. SALIN DATA FORM KE TEMPLATE INVOICE
+            document.getElementById('invTargetCustName').innerText = currentName;
+            document.getElementById('invTargetInvNumber').innerText = currentInvNumber;
+            document.getElementById('invTargetInvDate').innerText = currentDate;
+
             let paketItem = [];
-            let rows = document.querySelectorAll('#itemsBody tr');
-            
-            rows.forEach(row => {
+            let rowsKwitansi = document.querySelectorAll('#itemsBody tr');
+            let rowsInvoice = document.querySelectorAll('#invTargetItemsBody tr');
+
+            rowsKwitansi.forEach((row, idx) => {
                 let desc = row.querySelector('.desc-input').value.trim();
                 let qty = row.querySelector('.qty-input').value.trim();
-                let price = row.querySelector('.price-input').value.replace(/\D/g, '');
-                
-                if (desc !== "" || price !== "") {
-                    itemsArray.push({ desc, qty, price });
-                    paketItem.push(`${desc}#${qty || "1"}#${price}`);
+                let priceInput = row.querySelector('.price-input').value.replace(/\D/g, '');
+                let price = parseFloat(priceInput) || 0;
+
+                if (rowsInvoice[idx]) {
+                    rowsInvoice[idx].querySelector('.target-desc').innerText = desc;
+                    rowsInvoice[idx].querySelector('.target-qty').innerText = desc ? (qty || "1") : "";
+                    rowsInvoice[idx].querySelector('.target-price').innerText = price > 0 ? price.toLocaleString('id-ID') : "";
+                    
+                    let sub = (parseFloat(qty) || 1) * price;
+                    rowsInvoice[idx].querySelector('.target-total').innerText = sub > 0 ? sub.toLocaleString('id-ID') : "0";
+                }
+
+                if (desc !== "" || price > 0) {
+                    paketItem.push(`${desc}#${qty || "1"}#${priceInput}`);
                 }
             });
+
+            document.getElementById('invTargetGrandTotal').innerText = globalTotal > 0 ? globalTotal.toLocaleString('id-ID') : "0";
             let stringItemGabung = paketItem.join(', ');
 
-            // 2. SALIN DATA KE INVOICE (VIA IFRAME) DAN UNDUH GAMBAR LOKAL
+            // 2. GENERATE & UNDUH GAMBAR INVOICE LOKAL
+            const targetInvoice = document.getElementById('invoiceCard');
             try {
-                const iframe = document.getElementById('iframeInvoice');
-                const iframeWin = iframe.contentWindow;
-                if (iframeWin && typeof iframeWin.populateAndDownloadInvoice === 'function') {
-                    await iframeWin.populateAndDownloadInvoice({
-                        invNumber: currentInvNumber,
-                        custName: currentName,
-                        invDate: currentDate,
-                        items: itemsArray
-                    });
-                }
+                const canvasInv = await html2canvas(targetInvoice, {
+                    useCORS: true,
+                    scale: 2,
+                    logging: false,
+                    backgroundColor: "#ffffff"
+                });
+
+                let imageInvURI = canvasInv.toDataURL('image/jpeg', 0.95);
+                let linkInv = document.createElement('a');
+                linkInv.href = imageInvURI;
+                linkInv.download = `${currentInvNumber}.jpg`;
+                document.body.appendChild(linkInv);
+                linkInv.click();
+                document.body.removeChild(linkInv);
             } catch (err) {
-                console.error("Gagal mengekspor Invoice lokal:", err);
+                console.error("Gagal membuat gambar Invoice lokal:", err);
             }
 
-            // 3. PROSES RENDER KWITANSI & UPLOAD KE GOOGLE DRIVE
-            const targetInvoice = document.getElementById('invoice');
-            const cloneInvoice = targetInvoice.cloneNode(true);
+            // 3. GENERATE GAMBAR KWITANSI & UPLOAD KE GOOGLE DRIVE
+            const targetKwitansi = document.getElementById('kwitansiCard');
+            const cloneKwitansi = targetKwitansi.cloneNode(true);
             
-            cloneInvoice.style.position = "fixed";
-            cloneInvoice.style.top = "0";
-            cloneInvoice.style.left = "-9999px"; 
-            document.body.appendChild(cloneInvoice);
+            cloneKwitansi.style.position = "fixed";
+            cloneKwitansi.style.top = "0";
+            cloneKwitansi.style.left = "-9999px"; 
+            document.body.appendChild(cloneKwitansi);
 
-            const originalInputs = targetInvoice.querySelectorAll('input');
-            const clonedInputs = cloneInvoice.querySelectorAll('input');
+            const originalInputs = targetKwitansi.querySelectorAll('input');
+            const clonedInputs = cloneKwitansi.querySelectorAll('input');
 
             clonedInputs.forEach((clonedInput, index) => {
                 const originalValue = originalInputs[index].value;
@@ -304,25 +410,27 @@
             });
 
             const originalStempel = document.getElementById('stempelLunas');
-            const clonedStempel = cloneInvoice.querySelector('#stempelLunas');
+            const clonedStempel = cloneKwitansi.querySelector('#stempelLunas');
             if (originalStempel.classList.contains('hidden')) {
                 clonedStempel.classList.add('hidden');
             } else {
                 clonedStempel.classList.remove('hidden');
             }
 
-            html2canvas(cloneInvoice, {
-                useCORS: true,
-                scale: 2,
-                logging: false,
-                backgroundColor: "#ffffff"
-            }).then(canvas => {
-                let base64Image = canvas.toDataURL('image/jpeg', 0.95);
-                document.body.removeChild(cloneInvoice);
+            try {
+                const canvasKwitansi = await html2canvas(cloneKwitansi, {
+                    useCORS: true,
+                    scale: 2,
+                    logging: false,
+                    backgroundColor: "#ffffff"
+                });
+
+                let base64Kwitansi = canvasKwitansi.toDataURL('image/jpeg', 0.95);
+                document.body.removeChild(cloneKwitansi);
 
                 let payload = {
                     action: "saveInvoiceAll",
-                    image: base64Image,
+                    image: base64Kwitansi,
                     invNumber: currentInvNumber,
                     custName: currentName,
                     invDate: currentDate,
@@ -332,26 +440,27 @@
                     sisa: globalSisa
                 };
 
-                return fetch(URL_WEB_APP, {
+                let response = await fetch(URL_WEB_APP, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(payload)
                 });
-            }).then(response => response.json())
-            .then(resData => {
+                
+                let resData = await response.json();
+
                 if(resData.status === "SUCCESS") {
-                    alert(`Sukses!\n- Kwitansi tersimpan di Drive.\n- Invoice (${currentInvNumber}.jpg) terunduh ke lokal.`);
+                    alert(`Sukses!\n- Kwitansi tersimpan di Google Drive.\n- Invoice (${currentInvNumber}.jpg) berhasil terunduh ke lokal.`);
                     window.location.reload();
                 } else {
                     alert('Gagal menyimpan ke Drive: ' + resData.message);
                     btn.disabled = false;
                     btn.innerText = "Simpan / Bagikan";
                 }
-            }).catch(error => {
+            } catch (error) {
                 alert('Terjadi kesalahan koneksi sistem.');
                 btn.disabled = false;
                 btn.innerText = "Simpan / Bagikan";
-            });
+            }
         });
 </script>
 </body>
