@@ -179,6 +179,9 @@
         const URL_WEB_APP = "https://script.google.com/macros/s/AKfycby9daU4NZrFOwAmhPjPw_z0TCpFGKI-pvfaHnsmUabBvI3gdfv_rqy-Y6F02w0q9Yo/exec";
 
         let globalTotal = 0;
+        let globalDP = 0;
+        let globalSisa = 0;
+
         const hariIni = new Date();
         const opsi = { day: 'numeric', month: 'long', year: 'numeric' };
         document.getElementById('invDate').value = hariIni.toLocaleDateString('id-ID', opsi);
@@ -237,8 +240,11 @@
             let digits = dpInput.value.replace(/\D/g, '');
             let dpValue = parseFloat(digits);
             if (isNaN(dpValue)) dpValue = 0;
-            let sisa = globalTotal - dpValue;
-            document.getElementById('sisaTotal').innerText = sisa !== 0 ? sisa.toLocaleString('id-ID') : "0";
+            
+            globalDP = dpValue;
+            globalSisa = globalTotal - dpValue;
+            
+            document.getElementById('sisaTotal').innerText = globalSisa !== 0 ? globalSisa.toLocaleString('id-ID') : "0";
             const stempel = document.getElementById('stempelLunas');
             if (globalTotal > 0 && dpValue >= globalTotal) {
                 stempel.classList.remove('hidden');
@@ -263,23 +269,20 @@
                 let qty = row.querySelector('.qty-input').value.trim() || "1";
                 let price = row.querySelector('.price-input').value.replace(/\D/g, '');
                 if (desc !== "" || price !== "") {
-                    paketItem.push(`${desc} (${qty}x @${price})`);
+                    paketItem.push(`${desc}#${qty}#${price}`);
                 }
             });
             let stringItemGabung = paketItem.join(', ');
 
-            // STRATEGI CLONE JAUH LEBIH AGRESIF:
-            // Gandakan elemen #invoice secara total lalu ganti semua input menjadi text statis di dalam klon tersebut
+            // Gandakan elemen #invoice untuk dirender sebagai gambar
             const targetInvoice = document.getElementById('invoice');
             const cloneInvoice = targetInvoice.cloneNode(true);
             
-            // Masukkan klon tersembunyi ke ujung dokumen agar bisa dibaca html2canvas dengan sempurna
             cloneInvoice.style.position = "fixed";
             cloneInvoice.style.top = "0";
             cloneInvoice.style.left = "-9999px"; 
             document.body.appendChild(cloneInvoice);
 
-            // Cari dan ubah paksa seluruh input di dalam element Kloning menjadi text biasa
             const originalInputs = targetInvoice.querySelectorAll('input');
             const clonedInputs = cloneInvoice.querySelectorAll('input');
 
@@ -297,7 +300,6 @@
                 parent.replaceChild(textSpan, clonedInput);
             });
 
-            // Pastikan stempel lunas sinkron statusnya di element kloning
             const originalStempel = document.getElementById('stempelLunas');
             const clonedStempel = cloneInvoice.querySelector('#stempelLunas');
             if (originalStempel.classList.contains('hidden')) {
@@ -306,16 +308,15 @@
                 clonedStempel.classList.remove('hidden');
             }
 
-            // Potret Menggunakan Element Kloning Yang Sudah Berisi Teks Murni
+            // Render menjadi Gambar JPG (image/jpeg)
             html2canvas(cloneInvoice, {
                 useCORS: true,
                 scale: 2,
                 logging: false,
-                backgroundColor: null
+                backgroundColor: "#ffffff"
             }).then(canvas => {
-                let base64Image = canvas.toDataURL('image/png');
+                let base64Image = canvas.toDataURL('image/jpeg', 0.95); // Format JPG
                 
-                // Hapus element kloning dari memori browser setelah selesai dipotret
                 document.body.removeChild(cloneInvoice);
 
                 let payload = {
@@ -324,9 +325,10 @@
                     invNumber: currentInvNumber,
                     custName: currentName,
                     invDate: currentDate,
-                    totalHarga: globalTotal,
                     items: stringItemGabung,
-                    noHp: ""
+                    dp: globalDP,
+                    totalHarga: globalTotal,
+                    sisa: globalSisa
                 };
 
                 return fetch(URL_WEB_APP, {
@@ -337,7 +339,7 @@
             }).then(response => response.json())
             .then(resData => {
                 if(resData.status === "SUCCESS") {
-                    alert(`Sukses! Kwitansi ${currentInvNumber} berhasil disimpan.`);
+                    alert(`Sukses! Kwitansi ${currentInvNumber} dan file JPG berhasil disimpan.`);
                     window.location.reload();
                 } else {
                     alert('Gagal menyimpan: ' + resData.message);
