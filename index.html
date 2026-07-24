@@ -34,7 +34,7 @@
             </div>
             <div class="flex items-center gap-1 mb-1">
                 <span class="w-24 text-black">Invoice no :</span>
-                <input type="text" id="invNumber" class="border-b flex-1 outline-none font-bold" value="INV-2026-001" 
+                <input type="text" id="invNumber" class="border-b flex-1 outline-none font-bold" value="" placeholder="Nomor Invoice"
                        style="background-color: transparent !important; color: #000000 !important; border-bottom-color: #cccccc !important;">
             </div>
             <div class="flex items-center gap-1">
@@ -150,18 +150,10 @@
 </style>
 
 <script>
-        const URL_WEB_APP = "https://script.google.com/macros/s/AKfycby9daU4NZrFOwAmhPjPw_z0TCpFGKI-pvfaHnsmUabBvI3gdfv_rqy-Y6F02w0q9Yo/exec";
-
-        let autoInvoiceEnabled = true;
         const invNumberInput = document.getElementById('invNumber');
 
-        if (invNumberInput) {
-            invNumberInput.addEventListener('input', function() { autoInvoiceEnabled = false; });
-            invNumberInput.addEventListener('focus', function() { autoInvoiceEnabled = false; });
-        }
-
         function updateInvoiceNumberFromApp(newNumber) {
-            if (autoInvoiceEnabled && invNumberInput) {
+            if (invNumberInput) {
                 invNumberInput.value = String(newNumber);
             }
         }
@@ -177,17 +169,6 @@
             if (dateInput && dateInput.value === "") {
                 dateInput.value = getTanggalHariIni();
             }
-
-            // AMBIL NOMOR INVOICE DARI SERVER GOOGLE APPS SCRIPT
-            fetch(`${URL_WEB_APP}?action=getNextInvoice`)
-            .then(res => res.json())
-            .then(data => {
-                if(data.status === "SUCCESS" && autoInvoiceEnabled) {
-                    document.getElementById('invNumber').value = data.nextInvoiceNumber;
-                }
-            }).catch(err => {
-                console.log("Gagal mengambil nomor otomatis:", err);
-            });
         });
 
         function updateCustomerDataFromApp(paketData) {
@@ -218,7 +199,7 @@
                 if (dateInput) dateInput.value = tanggalHariIni;
             }
         }
-		
+
         function clearInvoiceTable() {
             let rows = document.querySelectorAll('#itemsBody tr');
             rows.forEach(row => {
