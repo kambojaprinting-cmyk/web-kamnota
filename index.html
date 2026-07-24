@@ -186,31 +186,31 @@
                 INVOICE
             </div>
             
-            <!-- PERBAIKAN 1: Teks Rapi Tanpa Garis Bawah Menimpa -->
-            <div class="text-xs mb-4" style="color: #000000 !important;">
-                <div class="flex items-center gap-1 mb-1">
+            <!-- REVISI 1: Jarak Antar Baris Dirapatkan (space-y-0.5 & leading-tight) -->
+            <div class="text-xs mb-3 space-y-0.5" style="color: #000000 !important;">
+                <div class="flex items-center gap-1">
                     <span class="w-24 text-black">Kepada Yth :</span>
-                    <span id="invTargetCustName" class="font-bold text-black flex-1 min-h-[18px] pb-0.5"></span>
+                    <span id="invTargetCustName" class="font-bold text-black flex-1 leading-tight"></span>
                 </div>
-                <div class="flex items-center gap-1 mb-1">
+                <div class="flex items-center gap-1">
                     <span class="w-24 text-black">Invoice no :</span>
-                    <span id="invTargetInvNumber" class="font-bold text-black flex-1 min-h-[18px] pb-0.5"></span>
+                    <span id="invTargetInvNumber" class="font-bold text-black flex-1 leading-tight"></span>
                 </div>
                 <div class="flex items-center gap-1">
                     <span class="w-24 text-black">Tanggal :</span>
-                    <span id="invTargetInvDate" class="font-bold text-black flex-1 min-h-[18px] pb-0.5"></span>
+                    <span id="invTargetInvDate" class="font-bold text-black flex-1 leading-tight"></span>
                 </div>
             </div>
 
             <table class="w-full text-xs mb-6 border-collapse table-fixed">
                 <thead>
-                    <!-- PERBAIKAN 2: Posisi Teks Berada Tepat di Tengah Kotak Abu-Abu secara Vertikal -->
+                    <!-- REVISI 2: Alignment Vertikal diatur Top Center (align-top & pt-1.5) -->
                     <tr style="background-color: rgba(229, 231, 235, 0.9) !important; height: 32px;">
-                        <th class="p-1 align-middle text-center w-[6%]" style="color: #000000 !important;">No.</th>
-                        <th class="p-1 align-middle text-left w-[42%]" style="color: #000000 !important;">Deskripsi</th>
-                        <th class="p-1 align-middle text-center w-[12%]" style="color: #000000 !important;">Qty</th>
-                        <th class="p-1 align-middle text-right w-[18%]" style="color: #000000 !important;">Harga</th>
-                        <th class="p-1 align-middle text-right w-[22%]" style="color: #000000 !important;">Total</th>
+                        <th class="p-1 pt-1.5 align-top text-center w-[6%]" style="color: #000000 !important;">No.</th>
+                        <th class="p-1 pt-1.5 align-top text-left w-[42%]" style="color: #000000 !important;">Deskripsi</th>
+                        <th class="p-1 pt-1.5 align-top text-center w-[12%]" style="color: #000000 !important;">Qty</th>
+                        <th class="p-1 pt-1.5 align-top text-right w-[18%]" style="color: #000000 !important;">Harga</th>
+                        <th class="p-1 pt-1.5 align-top text-right w-[22%]" style="color: #000000 !important;">Total</th>
                     </tr>
                 </thead>
                 <tbody id="invTargetItemsBody">
@@ -237,7 +237,6 @@
 
             <p class="font-bold" style="color: #000000 !important; font-size: 10px;">ORDER DIPROSES SETELAH PEMBAYARAN DITERIMA</p>
             
-            <!-- PERBAIKAN 3: Diturunkan ~3 Baris Kebawah (mt-20) Agar Mengisi Area Kosong -->
             <div class="mt-20 text-right text-xs" style="color: #000000 !important;">
                 <p style="color: #000000 !important;">Hormat Kami,</p>
                 <br><br>
