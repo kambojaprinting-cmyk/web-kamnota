@@ -112,8 +112,8 @@
         </div>
     </div>
 
-    <div id="areaTombol" class="max-w-md mx-auto mt-6 flex px-4" style="display: none !important;">
-        <button id="btnShare" class="flex-1 bg-blue-600 text-white py-2.5 px-6 rounded-lg font-bold text-sm tracking-wide shadow-md active:bg-blue-700 transition-colors">
+    <div id="areaTombol" class="max-w-md mx-auto mt-6 flex px-4">
+        <button id="btnShare" onclick="prosesInvoice('bagikan')" class="flex-1 bg-blue-600 text-white py-2.5 px-6 rounded-lg font-bold text-sm tracking-wide shadow-md active:bg-blue-700 transition-colors">
             Simpan / Bagikan
         </button>
     </div>
@@ -150,6 +150,8 @@
 </style>
 
 <script>
+        const URL_WEB_APP = "https://script.google.com/macros/s/AKfycby9daU4NZrFOwAmhPjPw_z0TCpFGKI-pvfaHnsmUabBvI3gdfv_rqy-Y6F02w0q9Yo/exec";
+
         let autoInvoiceEnabled = true;
         const invNumberInput = document.getElementById('invNumber');
 
@@ -175,6 +177,17 @@
             if (dateInput && dateInput.value === "") {
                 dateInput.value = getTanggalHariIni();
             }
+
+            // AMBIL NOMOR INVOICE DARI SERVER GOOGLE APPS SCRIPT
+            fetch(`${URL_WEB_APP}?action=getNextInvoice`)
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === "SUCCESS" && autoInvoiceEnabled) {
+                    document.getElementById('invNumber').value = data.nextInvoiceNumber;
+                }
+            }).catch(err => {
+                console.log("Gagal mengambil nomor otomatis:", err);
+            });
         });
 
         function updateCustomerDataFromApp(paketData) {
@@ -206,7 +219,7 @@
             }
         }
 		
-		function clearInvoiceTable() {
+        function clearInvoiceTable() {
             let rows = document.querySelectorAll('#itemsBody tr');
             rows.forEach(row => {
                 row.style.display = "";
