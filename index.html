@@ -266,11 +266,11 @@
             });
         });
 
-        // ==========================================================
-        // 4. FUNGSI UNIVERSAL: DIKENDALIKAN LANGSUNG DARI APP INVENTOR
-        // ==========================================================
+        // ==========================================
+        // FUNGSI PEMPROSESAN DATA INVOICE (SUDAH DIPERBAIKI)
+        // ==========================================
         function prosesInvoice(aksi) {
-            // Jika aksi 'bagikan', hilangkan placeholder biar hasil potret bersih
+            // 1. Hilangkan placeholder jika aksi 'bagikan'
             if (aksi === 'bagikan') {
                 let textInputs = document.querySelectorAll('#itemsBody .desc-input');
                 textInputs.forEach(input => {
@@ -281,10 +281,19 @@
                 });
             }
 
+            // 2. Ambil nilai dasar
             let currentInvNumber = document.getElementById('invNumber') ? document.getElementById('invNumber').value : "";
             let currentName = document.getElementById('custName') ? document.getElementById('custName').value : "";
             let currentDate = document.getElementById('invDate') ? document.getElementById('invDate').value : "";
 
+            // 3. Ambil nilai DP
+            let dpInput = document.getElementById('dpAmount');
+            let dpDigits = "0";
+            if (dpInput && dpInput.value.trim() !== "") {
+                dpDigits = dpInput.value.replace(/\D/g, '') || "0";
+            }
+
+            // 4. Susun Paket Item
             let paketItem = [];
             let rows = document.querySelectorAll('#itemsBody tr');
             
@@ -297,13 +306,12 @@
                 let desc = descInput && descInput.value.trim() !== "" ? descInput.value.trim() : "";
                 let qty = qtyInput && qtyInput.value.trim() !== "" ? qtyInput.value.trim() : "1";
                 
-                let priceDigits = priceInput ? priceInput.value.replace(/\D/g, '') : '';
+                let priceDigits = priceInput ? priceInput.value.replace(/\D/g, '') : "0";
                 let valPrice = parseFloat(priceDigits);
                 if (isNaN(valPrice)) valPrice = 0;
                 let priceStr = valPrice > 0 ? priceDigits : "";
 
                 if (desc === "" && valPrice === 0) {
-                    // Hanya sembunyikan baris kosong jika akan dipotret
                     if (aksi === 'bagikan') {
                         if (priceInput) priceInput.style.visibility = 'hidden';
                         if (qtyInput) qtyInput.style.visibility = 'hidden';
@@ -315,26 +323,36 @@
             });
 
             let stringHasilTabel = paketItem.length > 0 ? paketItem.join('~') : "-";
-            let teksTotal = document.getElementById('grandTotal').innerText;
+            let grandTotalElem = document.getElementById('grandTotal');
+            let teksTotal = grandTotalElem ? grandTotalElem.innerText : "0";
             let totalHarga = teksTotal.replace(/\D/g, '');
             if (totalHarga === "") totalHarga = "0";
 
-            let dpDigits = "0";
             let noHp = "-";
 
-            // 1. Keduanya sama-sama mengirim data ke App Inventor untuk disimpan ke cloud
+            // 5. JIKA DIBUKA VIA APP INVENTOR (ANDROID APP)
             if (window.AppInventor && window.AppInventor.setWebViewString) {
                 window.AppInventor.setWebViewString("simpan_data|" + currentInvNumber + "|" + currentName + "|" + currentDate + "|" + stringHasilTabel + "|" + dpDigits + "|" + totalHarga + "|" + noHp);
+
+                if (aksi === 'bagikan') {
+                    setTimeout(function() {
+                        if (window.AppInventor && window.AppInventor.setWebViewString) {
+                            window.AppInventor.setWebViewString("potret_sekarang");
+                        }
+                    }, 100);
+                }
             }
 
-            // 2. Khusus perintah 'bagikan', picu perintah potret layar setelah jeda
-            if (aksi === 'bagikan') {
-                setTimeout(function() {
-                    if (window.AppInventor && window.AppInventor.setWebViewString) {
-                        window.AppInventor.setWebViewString("potret_sekarang");
-                    }
-                }, 100);
-            }
+            // 6. JIKA DIBUKA VIA PUPPETEER (VERCEL / AKSITA AI)
+            return {
+                status: "SUCCESS",
+                invNumber: currentInvNumber,
+                custName: currentName,
+                invDate: currentDate,
+                items: stringHasilTabel,
+                dp: parseInt(dpDigits) || 0,
+                total: parseInt(totalHarga) || 0
+            };
         }
 
         function calculate() {
@@ -396,6 +414,9 @@
             let btn = this;
             btn.disabled = true;
             btn.innerText = "Memproses...";
+
+            // Panggil fungsi prosesInvoice sebelum eksekusi lanjutan
+            prosesInvoice('bagikan');
 
             let currentInvNumber = document.getElementById('invNumber').value;
             let currentName = document.getElementById('custName').value;
@@ -504,8 +525,8 @@
 
                 let payload = {
                     action: "saveInvoiceAll",
-                    image: base64Kwitansi,            // Kwitansi ke Folder 1
-                    invoiceImage: base64Invoice,      // Invoice ke Folder 2 (1JXrB7fCDfyMTn8CkF9UpgCO_P-LPKPFK)
+                    image: base64Kwitansi,            
+                    invoiceImage: base64Invoice,      
                     invNumber: currentInvNumber,
                     custName: currentName,
                     invDate: currentDate,
