@@ -102,47 +102,26 @@
                 </tr>
             </thead>
             <tbody id="itemsBody">
-                <tr style="height: 28px;">
-                    <td class="p-1 border-b text-center row-no" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;">1.</td>
-                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;">
-                        <input type="text" class="w-full outline-none desc-input text-black" style="background-color: transparent !important; color: #000000 !important;">
-                    </td>
-                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;">
-                        <input type="number" class="w-full text-center outline-none qty-input text-black" oninput="calculate()" style="background-color: transparent !important; color: #000000 !important;">
-                    </td>
-                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;">
-                        <input type="text" inputmode="numeric" class="w-full text-right outline-none price-input text-black" oninput="calculate()" style="background-color: transparent !important; color: #000000 !important;">
-                    </td>
-                    <td class="p-1 border-b text-right row-total font-bold" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;">0</td>
-                </tr>
-                <tr style="height: 28px;">
-                    <td class="p-1 border-b text-center row-no" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;">2.</td>
-                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;"> <input type="text" class="w-full outline-none desc-input text-black" style="background-color: transparent !important; color: #000000 !important;"> </td>
-                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;"> <input type="number" class="w-full text-center outline-none qty-input text-black" oninput="calculate()" style="background-color: transparent !important; color: #000000 !important;"> </td>
-                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;"> <input type="text" inputmode="numeric" class="w-full text-right outline-none price-input text-black" oninput="calculate()" style="background-color: transparent !important; color: #000000 !important;"> </td>
-                    <td class="p-1 border-b text-right row-total font-bold" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;">0</td>
-                </tr>
-                <tr style="height: 28px;">
-                    <td class="p-1 border-b text-center" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;">3.</td>
-                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;"> <input type="text" class="w-full outline-none desc-input text-black" style="background-color: transparent !important; color: #000000 !important;"> </td>
-                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;"> <input type="number" class="w-full text-center outline-none qty-input text-black" oninput="calculate()" style="background-color: transparent !important; color: #000000 !important;"> </td>
-                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;"> <input type="text" inputmode="numeric" class="w-full text-right outline-none price-input text-black" oninput="calculate()" style="background-color: transparent !important; color: #000000 !important;"> </td>
-                    <td class="p-1 border-b text-right row-total font-bold" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;">0</td>
-                </tr>
-                <tr style="height: 28px;">
-                    <td class="p-1 border-b text-center" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;">4.</td>
-                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;"> <input type="text" class="w-full outline-none desc-input text-black" style="background-color: transparent !important; color: #000000 !important;"> </td>
-                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;"> <input type="number" class="w-full text-center outline-none qty-input text-black" oninput="calculate()" style="background-color: transparent !important; color: #000000 !important;"> </td>
-                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;"> <input type="text" inputmode="numeric" class="w-full text-right outline-none price-input text-black" oninput="calculate()" style="background-color: transparent !important; color: #000000 !important;"> </td>
-                    <td class="p-1 border-b text-right row-total font-bold" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;">0</td>
-                </tr>
-                <tr style="height: 28px;">
-                    <td class="p-1 border-b text-center" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;">5.</td>
-                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;"> <input type="text" class="w-full outline-none desc-input text-black" style="background-color: transparent !important; color: #000000 !important;"> </td>
-                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;"> <input type="number" class="w-full text-center outline-none qty-input text-black" oninput="calculate()" style="background-color: transparent !important; color: #000000 !important;"> </td>
-                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;"> <input type="text" inputmode="numeric" class="w-full text-right outline-none price-input text-black" oninput="calculate()" style="background-color: transparent !important; color: #000000 !important;"> </td>
-                    <td class="p-1 border-b text-right row-total font-bold" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;">0</td>
-                </tr>
+                <!-- Baris 1 - 5 -->
+                <script>
+                    for(let i=1; i<=5; i++) {
+                        document.write(`
+                        <tr style="height: 28px;">
+                            <td class="p-1 border-b text-center row-no" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;">${i}.</td>
+                            <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;">
+                                <input type="text" class="w-full outline-none desc-input text-black" style="background-color: transparent !important; color: #000000 !important;">
+                            </td>
+                            <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;">
+                                <input type="number" class="w-full text-center outline-none qty-input text-black" oninput="calculate()" style="background-color: transparent !important; color: #000000 !important;">
+                            </td>
+                            <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;">
+                                <input type="text" inputmode="numeric" class="w-full text-right outline-none price-input text-black" oninput="calculate()" style="background-color: transparent !important; color: #000000 !important;">
+                            </td>
+                            <td class="p-1 border-b text-right row-total font-bold" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;">0</td>
+                        </tr>
+                        `);
+                    }
+                </script>
             </tbody>
         </table>
 
@@ -174,6 +153,9 @@
             Simpan / Bagikan
         </button>
     </div>
+
+    <!-- Iframe tersembunyi untuk merender invoice.html -->
+    <iframe id="iframeInvoice" src="invoice.html" style="position: absolute; left: -9999px; top: -9999px; width: 800px; height: 1200px;"></iframe>
 
 <script>
         const URL_WEB_APP = "https://script.google.com/macros/s/AKfycby9daU4NZrFOwAmhPjPw_z0TCpFGKI-pvfaHnsmUabBvI3gdfv_rqy-Y6F02w0q9Yo/exec";
@@ -253,7 +235,7 @@
             }
         }
 
-        document.getElementById('btnShare').addEventListener('click', function() {
+        document.getElementById('btnShare').addEventListener('click', async function() {
             let btn = this;
             btn.disabled = true;
             btn.innerText = "Memproses...";
@@ -262,29 +244,40 @@
             let currentName = document.getElementById('custName').value;
             let currentDate = document.getElementById('invDate').value;
 
+            // 1. KUMPULKAN DATA DARI TABEL
             let itemsArray = [];
+            let paketItem = [];
             let rows = document.querySelectorAll('#itemsBody tr');
+            
             rows.forEach(row => {
                 let desc = row.querySelector('.desc-input').value.trim();
-                let qty = row.querySelector('.qty-input').value.trim() || "1";
+                let qty = row.querySelector('.qty-input').value.trim();
                 let price = row.querySelector('.price-input').value.replace(/\D/g, '');
+                
                 if (desc !== "" || price !== "") {
-                    itemsArray.push({ desc: desc, qty: qty, price: price });
+                    itemsArray.push({ desc, qty, price });
+                    paketItem.push(`${desc}#${qty || "1"}#${price}`);
                 }
             });
+            let stringItemGabung = paketItem.join(', ');
 
-            let stringItemGabung = itemsArray.map(i => `${i.desc}#${i.qty}#${i.price}`).join(', ');
+            // 2. SALIN DATA KE INVOICE (VIA IFRAME) DAN UNDUH GAMBAR LOKAL
+            try {
+                const iframe = document.getElementById('iframeInvoice');
+                const iframeWin = iframe.contentWindow;
+                if (iframeWin && typeof iframeWin.populateAndDownloadInvoice === 'function') {
+                    await iframeWin.populateAndDownloadInvoice({
+                        invNumber: currentInvNumber,
+                        custName: currentName,
+                        invDate: currentDate,
+                        items: itemsArray
+                    });
+                }
+            } catch (err) {
+                console.error("Gagal mengekspor Invoice lokal:", err);
+            }
 
-            // Simpan data formulir ke localStorage untuk invoice.html
-            const invoicePayload = {
-                invNumber: currentInvNumber,
-                custName: currentName,
-                invDate: currentDate,
-                items: itemsArray
-            };
-            localStorage.setItem('pendingInvoiceData', JSON.stringify(invoicePayload));
-
-            // Render Kwitansi menjadi Gambar JPG untuk disimpan di Google Drive
+            // 3. PROSES RENDER KWITANSI & UPLOAD KE GOOGLE DRIVE
             const targetInvoice = document.getElementById('invoice');
             const cloneInvoice = targetInvoice.cloneNode(true);
             
@@ -347,10 +340,10 @@
             }).then(response => response.json())
             .then(resData => {
                 if(resData.status === "SUCCESS") {
-                    // Pindah ke Halaman Invoice untuk Unduh Gambar Lokal
-                    window.location.href = "invoice.html";
+                    alert(`Sukses!\n- Kwitansi tersimpan di Drive.\n- Invoice (${currentInvNumber}.jpg) terunduh ke lokal.`);
+                    window.location.reload();
                 } else {
-                    alert('Gagal menyimpan: ' + resData.message);
+                    alert('Gagal menyimpan ke Drive: ' + resData.message);
                     btn.disabled = false;
                     btn.innerText = "Simpan / Bagikan";
                 }
