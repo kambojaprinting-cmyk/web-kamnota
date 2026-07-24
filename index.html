@@ -166,7 +166,7 @@
     </div>
 
     <!-- ======================================================== -->
-    <!-- 2. TEMPLATE INVOICE TERSEMBUNYI (JARAK HORIZONTAL MEPET)  -->
+    <!-- 2. TEMPLATE INVOICE TERSEMBUNYI                             -->
     <!-- ======================================================== -->
     <div id="renderInvoiceWrapper">
         <div id="invoiceCard" class="form-card p-6 shadow-lg border border-gray-200" 
@@ -186,7 +186,6 @@
                 INVOICE
             </div>
             
-            <!-- REVISI PRESISI: width 68px agar teks data rapat persis di sebelah titik dua -->
             <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 12px; color: #000000 !important;">
                 <tr>
                     <td style="width: 68px !important; padding: 0.5px 0; vertical-align: middle; color: #000000;">Kepada Yth :</td>
@@ -363,7 +362,8 @@
             document.getElementById('invTargetGrandTotal').innerText = globalTotal > 0 ? globalTotal.toLocaleString('id-ID') : "0";
             let stringItemGabung = paketItem.join(', ');
 
-            // 2. GENERATE & UNDUH GAMBAR INVOICE LOKAL
+            // 2. GENERATE GAMBAR INVOICE LOKAL DAN BASE64 UNTUK DRIVE
+            let base64Invoice = "";
             const targetInvoice = document.getElementById('invoiceCard');
             try {
                 const canvasInv = await html2canvas(targetInvoice, {
@@ -373,9 +373,11 @@
                     backgroundColor: "#ffffff"
                 });
 
-                let imageInvURI = canvasInv.toDataURL('image/jpeg', 0.95);
+                base64Invoice = canvasInv.toDataURL('image/jpeg', 0.95);
+                
+                // Pemicu Unduhan Lokal
                 let linkInv = document.createElement('a');
-                linkInv.href = imageInvURI;
+                linkInv.href = base64Invoice;
                 linkInv.download = `${currentInvNumber}.jpg`;
                 document.body.appendChild(linkInv);
                 linkInv.click();
@@ -384,7 +386,7 @@
                 console.error("Gagal membuat gambar Invoice lokal:", err);
             }
 
-            // 3. GENERATE GAMBAR KWITANSI & UPLOAD KE GOOGLE DRIVE
+            // 3. GENERATE GAMBAR KWITANSI
             const targetKwitansi = document.getElementById('kwitansiCard');
             const cloneKwitansi = targetKwitansi.cloneNode(true);
             
@@ -431,7 +433,8 @@
 
                 let payload = {
                     action: "saveInvoiceAll",
-                    image: base64Kwitansi,
+                    image: base64Kwitansi,            // Kwitansi ke Folder 1
+                    invoiceImage: base64Invoice,      // Invoice ke Folder 2 (1JXrB7fCDfyMTn8CkF9UpgCO_P-LPKPFK)
                     invNumber: currentInvNumber,
                     custName: currentName,
                     invDate: currentDate,
@@ -450,7 +453,7 @@
                 let resData = await response.json();
 
                 if(resData.status === "SUCCESS") {
-                    alert(`Sukses!\n- Kwitansi tersimpan di Google Drive.\n- Invoice (${currentInvNumber}.jpg) berhasil terunduh ke lokal.`);
+                    alert(`Sukses!\n- Kwitansi tersimpan di Drive.\n- Invoice tersimpan di Drive.\n- Invoice (${currentInvNumber}.jpg) terunduh ke lokal.`);
                     window.location.reload();
                 } else {
                     alert('Gagal menyimpan ke Drive: ' + resData.message);
