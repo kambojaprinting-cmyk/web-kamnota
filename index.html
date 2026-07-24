@@ -278,7 +278,8 @@
         });
 
         // FUNGSI PANGGILAN API UNTUK MENGAMBIL DATA TERAKHIR DARI GOOGLE SHEETS
-        async function loadInvoiceTerakhirAndExecute() {
+        // FUNGSI PERBAIKAN TOTAL UNTUK AUTO-RUN
+async function loadInvoiceTerakhirAndExecute() {
     try {
         const response = await fetch(`${URL_WEB_APP}?action=getAllInvoices`);
         const result = await response.json();
@@ -286,48 +287,62 @@
         if (result.status === "SUCCESS" && result.data && result.data.length > 0) {
             const lastInvoice = result.data[result.data.length - 1];
             
-            // 1. Isi Header Invoice
+            // 1. Isi Header
             if (lastInvoice.invNumber) document.getElementById('invNumber').value = lastInvoice.invNumber;
             if (lastInvoice.custName) document.getElementById('custName').value = lastInvoice.custName;
             if (lastInvoice.invDate) document.getElementById('invDate').value = lastInvoice.invDate;
             
-            // 2. Isi DP (Jikalau ada)
             if (lastInvoice.dp && document.getElementById('dpAmount')) {
                 document.getElementById('dpAmount').value = lastInvoice.dp;
             }
 
-            // 3. BREAKDOWN ITEM & PAKSA HITUNG TABEL
+            // 2. Breakdown Item (Format: NamaBarang#Qty#Harga)
             if (lastInvoice.item && lastInvoice.item.includes('#')) {
                 const parts = lastInvoice.item.split('#');
                 const desc = parts[0] || "";
                 const qty = parts[1] || "1";
                 const price = parts[2] || "0";
 
-                let firstRow = document.querySelector('#itemsBody tr');
-                if (firstRow) {
-                    let descInput = firstRow.querySelector('.desc-input');
-                    let qtyInput = firstRow.querySelector('.qty-input');
-                    let priceInput = firstRow.querySelector('.price-input');
+                // A. ISI TABEL KWITANSI (FORM UTAMA)
+                let firstRowKwitansi = document.querySelector('#itemsBody tr');
+                if (firstRowKwitansi) {
+                    let descInput = firstRowKwitansi.querySelector('.desc-input');
+                    let qtyInput = firstRowKwitansi.querySelector('.qty-input');
+                    let priceInput = firstRowKwitansi.querySelector('.price-input');
 
                     if (descInput) descInput.value = desc;
                     if (qtyInput) qtyInput.value = qty;
                     if (priceInput) priceInput.value = price;
+                }
 
-                    // TRICK UTAMA: Pemicu (Trigger) Event Input agar kalkulasi matematika berjalan otomatis!
-                    if (qtyInput) qtyInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    if (priceInput) priceInput.dispatchEvent(new Event('input', { bubbles: true }));
+                // B. ISI LANGSUNG TABEL INVOICE (TEMPLATE TERSEMBUNYI)
+                let firstRowInvoice = document.querySelector('#invTargetItemsBody tr');
+                if (firstRowInvoice) {
+                    let targetDesc = firstRowInvoice.querySelector('.target-desc');
+                    let targetQty = firstRowInvoice.querySelector('.target-qty');
+                    let targetPrice = firstRowInvoice.querySelector('.target-price');
+                    let targetTotal = firstRowInvoice.querySelector('.target-total');
+
+                    const valPrice = parseFloat(price) || 0;
+                    const valQty = parseFloat(qty) || 1;
+                    const subtotal = valQty * valPrice;
+
+                    if (targetDesc) targetDesc.innerText = desc;
+                    if (targetQty) targetQty.innerText = qty;
+                    if (targetPrice) targetPrice.innerText = valPrice > 0 ? valPrice.toLocaleString('id-ID') : "";
+                    if (targetTotal) targetTotal.innerText = subtotal > 0 ? subtotal.toLocaleString('id-ID') : "0";
                 }
             }
 
-            // Jalankan kalkulasi manual jika ada fungsi calculate() bawaan
+            // 3. Pemicu Kalkulasi Matematika
             if (typeof calculate === 'function') calculate();
             if (typeof formatDPAndCalculate === 'function') formatDPAndCalculate();
-            
-            // 4. Download / Cetak Invoice setelah data terisi penuh
+
+            // 4. Beri jeda 800ms agar DOM & HTML2Canvas sempat membaca teks sebelum di-render
             setTimeout(() => {
                 const btnShare = document.getElementById('btnShare');
                 if (btnShare) btnShare.click();
-            }, 600);
+            }, 800);
         }
     } catch (err) {
         console.error("Gagal memuat data dari API Apps Script:", err);
