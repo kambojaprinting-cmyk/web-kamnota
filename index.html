@@ -166,7 +166,7 @@
     </div>
 
     <!-- ======================================================== -->
-    <!-- 2. TEMPLATE INVOICE TERSEMBUNYI (PENGUNCIAN POSISI MURNI)  -->
+    <!-- 2. TEMPLATE INVOICE TERSEMBUNYI (BAGIAN NAMA - TANGGAL RAPAT) -->
     <!-- ======================================================== -->
     <div id="renderInvoiceWrapper">
         <div id="invoiceCard" class="form-card p-6 shadow-lg border border-gray-200" 
@@ -186,17 +186,17 @@
                 INVOICE
             </div>
             
-            <!-- REVISI 1: Penguncian Jarak Rapat dengan Inline Style -->
+            <!-- PENYESUAIAN KETAT: Jarak Antar Baris Nama - Tanggal Sangat Rapat -->
             <div class="text-xs mb-3" style="color: #000000 !important;">
-                <div class="flex items-center gap-1" style="line-height: 1.15 !important; margin-bottom: 2px !important;">
+                <div class="flex items-center gap-1" style="line-height: 1.0 !important; margin-bottom: -1px !important;">
                     <span class="w-24 text-black">Kepada Yth :</span>
                     <span id="invTargetCustName" class="font-bold text-black flex-1"></span>
                 </div>
-                <div class="flex items-center gap-1" style="line-height: 1.15 !important; margin-bottom: 2px !important;">
+                <div class="flex items-center gap-1" style="line-height: 1.0 !important; margin-top: -2px !important; margin-bottom: -1px !important;">
                     <span class="w-24 text-black">Invoice no :</span>
                     <span id="invTargetInvNumber" class="font-bold text-black flex-1"></span>
                 </div>
-                <div class="flex items-center gap-1" style="line-height: 1.15 !important;">
+                <div class="flex items-center gap-1" style="line-height: 1.0 !important; margin-top: -2px !important;">
                     <span class="w-24 text-black">Tanggal :</span>
                     <span id="invTargetInvDate" class="font-bold text-black flex-1"></span>
                 </div>
@@ -204,7 +204,6 @@
 
             <table class="w-full text-xs mb-6 border-collapse table-fixed">
                 <thead>
-                    <!-- REVISI 2: Penguncian Posisi TOP CENTER Pada Kotak Abu-Abu -->
                     <tr style="background-color: rgba(229, 231, 235, 0.9) !important; height: 32px !important;">
                         <th class="w-[6%]" style="color: #000000 !important; vertical-align: top !important; padding-top: 2px !important; line-height: 1 !important; text-align: center !important;">No.</th>
                         <th class="w-[42%]" style="color: #000000 !important; vertical-align: top !important; padding-top: 2px !important; line-height: 1 !important; text-align: left !important;">Deskripsi</th>
