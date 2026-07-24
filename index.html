@@ -266,6 +266,77 @@
             });
         });
 
+        // ==========================================================
+        // 4. FUNGSI UNIVERSAL: DIKENDALIKAN LANGSUNG DARI APP INVENTOR
+        // ==========================================================
+        function prosesInvoice(aksi) {
+            // Jika aksi 'bagikan', hilangkan placeholder biar hasil potret bersih
+            if (aksi === 'bagikan') {
+                let textInputs = document.querySelectorAll('#itemsBody .desc-input');
+                textInputs.forEach(input => {
+                    if (input.value.trim() === "") {
+                        input.setAttribute('data-old-placeholder', input.placeholder);
+                        input.placeholder = "";
+                    }
+                });
+            }
+
+            let currentInvNumber = document.getElementById('invNumber') ? document.getElementById('invNumber').value : "";
+            let currentName = document.getElementById('custName') ? document.getElementById('custName').value : "";
+            let currentDate = document.getElementById('invDate') ? document.getElementById('invDate').value : "";
+
+            let paketItem = [];
+            let rows = document.querySelectorAll('#itemsBody tr');
+            
+            rows.forEach(row => {
+                let descInput = row.querySelector('.desc-input');
+                let qtyInput = row.querySelector('.qty-input');
+                let priceInput = row.querySelector('.price-input');
+                let rowTotal = row.querySelector('.row-total');
+                
+                let desc = descInput && descInput.value.trim() !== "" ? descInput.value.trim() : "";
+                let qty = qtyInput && qtyInput.value.trim() !== "" ? qtyInput.value.trim() : "1";
+                
+                let priceDigits = priceInput ? priceInput.value.replace(/\D/g, '') : '';
+                let valPrice = parseFloat(priceDigits);
+                if (isNaN(valPrice)) valPrice = 0;
+                let priceStr = valPrice > 0 ? priceDigits : "";
+
+                if (desc === "" && valPrice === 0) {
+                    // Hanya sembunyikan baris kosong jika akan dipotret
+                    if (aksi === 'bagikan') {
+                        if (priceInput) priceInput.style.visibility = 'hidden';
+                        if (qtyInput) qtyInput.style.visibility = 'hidden';
+                        if (rowTotal) rowTotal.style.visibility = 'hidden';
+                    }
+                } else {
+                    paketItem.push(desc + "#" + qty + "#" + priceStr);
+                }
+            });
+
+            let stringHasilTabel = paketItem.length > 0 ? paketItem.join('~') : "-";
+            let teksTotal = document.getElementById('grandTotal').innerText;
+            let totalHarga = teksTotal.replace(/\D/g, '');
+            if (totalHarga === "") totalHarga = "0";
+
+            let dpDigits = "0";
+            let noHp = "-";
+
+            // 1. Keduanya sama-sama mengirim data ke App Inventor untuk disimpan ke cloud
+            if (window.AppInventor && window.AppInventor.setWebViewString) {
+                window.AppInventor.setWebViewString("simpan_data|" + currentInvNumber + "|" + currentName + "|" + currentDate + "|" + stringHasilTabel + "|" + dpDigits + "|" + totalHarga + "|" + noHp);
+            }
+
+            // 2. Khusus perintah 'bagikan', picu perintah potret layar setelah jeda
+            if (aksi === 'bagikan') {
+                setTimeout(function() {
+                    if (window.AppInventor && window.AppInventor.setWebViewString) {
+                        window.AppInventor.setWebViewString("potret_sekarang");
+                    }
+                }, 100);
+            }
+        }
+
         function calculate() {
             let rows = document.querySelectorAll('#itemsBody tr');
             let total = 0;
