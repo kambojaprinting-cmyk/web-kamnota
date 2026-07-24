@@ -86,17 +86,17 @@
         <div class="text-xs mb-4" style="color: #000000 !important;">
             <div class="flex items-center gap-1 mb-1">
                 <span class="w-24 text-black">Telah terima dari :</span>
-                <input type="text" id="custName" class="border-b flex-1 outline-none font-bold text-black" placeholder="Nama Pelanggan" 
+                <input type="text" id="custName" class="border-b flex-1 outline-none font-bold text-black pb-0.5" placeholder="Nama Pelanggan" 
                        style="background-color: transparent !important; color: #000000 !important; border-bottom-color: #cccccc !important;">
             </div>
             <div class="flex items-center gap-1 mb-1">
                 <span class="w-24 text-black">Invoice no :</span>
-                <input type="text" id="invNumber" class="border-b flex-1 outline-none font-bold text-black" value="Memuat..." 
+                <input type="text" id="invNumber" class="border-b flex-1 outline-none font-bold text-black pb-0.5" value="Memuat..." 
                        style="background-color: transparent !important; color: #000000 !important; border-bottom-color: #cccccc !important;">
             </div>
             <div class="flex items-center gap-1">
                 <span class="w-24 text-black">Tanggal :</span>
-                <input type="text" id="invDate" class="border-b flex-1 outline-none font-bold text-black" value="" 
+                <input type="text" id="invDate" class="border-b flex-1 outline-none font-bold text-black pb-0.5" value="" 
                        style="background-color: transparent !important; color: #000000 !important; border-bottom-color: #cccccc !important;">
             </div>
         </div>
@@ -106,11 +106,11 @@
         <table class="w-full text-xs mb-5 border-collapse table-fixed">
             <thead>
                 <tr style="background-color: rgba(229, 231, 235, 0.8) !important; backdrop-filter: blur(1px);">
-                    <th class="p-1 text-center w-[6%]" style="color: #000000 !important;">No.</th>
-                    <th class="p-1 text-left w-[42%]" style="color: #000000 !important;">Deskripsi</th>
-                    <th class="p-1 text-center w-[12%]" style="color: #000000 !important;">Qty</th>
-                    <th class="p-1 text-right w-[18%]" style="color: #000000 !important;">Harga</th>
-                    <th class="p-1 text-right w-[22%]" style="color: #000000 !important;">Sub Total</th>
+                    <th class="py-2 px-1 text-center w-[6%] align-middle" style="color: #000000 !important;">No.</th>
+                    <th class="py-2 px-1 text-left w-[42%] align-middle" style="color: #000000 !important;">Deskripsi</th>
+                    <th class="py-2 px-1 text-center w-[12%] align-middle" style="color: #000000 !important;">Qty</th>
+                    <th class="py-2 px-1 text-right w-[18%] align-middle" style="color: #000000 !important;">Harga</th>
+                    <th class="py-2 px-1 text-right w-[22%] align-middle" style="color: #000000 !important;">Sub Total</th>
                 </tr>
             </thead>
             <tbody id="itemsBody">
@@ -152,9 +152,9 @@
         </div>
 
         <p class="font-bold" style="color: #000000 !important; font-size: 12px;">TERIMA KASIH ATAS KEPERCAYAAN ANDA</p>
-        <div class="mt-6 text-right text-xs" style="color: #000000 !important;">
+        <div class="mt-12 text-right text-xs" style="color: #000000 !important;">
             <p style="color: #000000 !important;">Hormat Kami,</p>
-            <br><br>
+            <br><br><br>
             <p class="font-bold" style="color: #000000 !important;">KAMBOJA PRINTING</p>
         </div>
     </div>
@@ -189,26 +189,26 @@
             <div class="text-xs mb-4" style="color: #000000 !important;">
                 <div class="flex items-center gap-1 mb-1">
                     <span class="w-24 text-black">Kepada Yth :</span>
-                    <span id="invTargetCustName" class="font-bold text-black border-b border-gray-300 flex-1 min-h-[18px]"></span>
+                    <span id="invTargetCustName" class="font-bold text-black border-b border-gray-300 flex-1 pb-1 leading-none min-h-[18px]"></span>
                 </div>
                 <div class="flex items-center gap-1 mb-1">
                     <span class="w-24 text-black">Invoice no :</span>
-                    <span id="invTargetInvNumber" class="font-bold text-black border-b border-gray-300 flex-1 min-h-[18px]"></span>
+                    <span id="invTargetInvNumber" class="font-bold text-black border-b border-gray-300 flex-1 pb-1 leading-none min-h-[18px]"></span>
                 </div>
                 <div class="flex items-center gap-1">
                     <span class="w-24 text-black">Tanggal :</span>
-                    <span id="invTargetInvDate" class="font-bold text-black border-b border-gray-300 flex-1 min-h-[18px]"></span>
+                    <span id="invTargetInvDate" class="font-bold text-black border-b border-gray-300 flex-1 pb-1 leading-none min-h-[18px]"></span>
                 </div>
             </div>
 
             <table class="w-full text-xs mb-6 border-collapse table-fixed">
                 <thead>
                     <tr style="background-color: rgba(229, 231, 235, 0.8) !important; backdrop-filter: blur(1px);">
-                        <th class="p-1 text-center w-[6%]" style="color: #000000 !important;">No.</th>
-                        <th class="p-1 text-left w-[42%]" style="color: #000000 !important;">Deskripsi</th>
-                        <th class="p-1 text-center w-[12%]" style="color: #000000 !important;">Qty</th>
-                        <th class="p-1 text-right w-[18%]" style="color: #000000 !important;">Harga</th>
-                        <th class="p-1 text-right w-[22%]" style="color: #000000 !important;">Total</th>
+                        <th class="py-2 px-1 text-center w-[6%] align-middle" style="color: #000000 !important;">No.</th>
+                        <th class="py-2 px-1 text-left w-[42%] align-middle" style="color: #000000 !important;">Deskripsi</th>
+                        <th class="py-2 px-1 text-center w-[12%] align-middle" style="color: #000000 !important;">Qty</th>
+                        <th class="py-2 px-1 text-right w-[18%] align-middle" style="color: #000000 !important;">Harga</th>
+                        <th class="py-2 px-1 text-right w-[22%] align-middle" style="color: #000000 !important;">Total</th>
                     </tr>
                 </thead>
                 <tbody id="invTargetItemsBody">
@@ -234,9 +234,9 @@
             </div>
 
             <p class="font-bold" style="color: #000000 !important; font-size: 10px;">ORDER DIPROSES SETELAH PEMBAYARAN DITERIMA</p>
-            <div class="mt-8 text-right text-xs" style="color: #000000 !important;">
+            <div class="mt-16 text-right text-xs" style="color: #000000 !important;">
                 <p style="color: #000000 !important;">Hormat Kami,</p>
-                <br><br>
+                <br><br><br>
                 <p class="font-bold" style="color: #000000 !important;">KAMBOJA PRINTING</p>
             </div>
         </div>
