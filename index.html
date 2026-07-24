@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generator Invoice Kamboja</title>
+    <title>Generator Kwitansi Kamboja</title>
     <meta name="color-scheme" content="light">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         html, body {
             background-color: #f3f4f6 !important;
@@ -15,44 +16,48 @@
             flex-direction: column;
             min-height: 100vh;
         }
-        #invoice { color: #000000 !important; }
-        
-        /* Modifikasi Khusus Saat Proses Potret / Download */
-        .mode-potret #areaTombol { display: none !important; }
-        .mode-potret, .mode-potret body {
-            height: min-content !important;
-            min-height: 0 !important;
-            background-color: #ffffff !important;
-            padding: 0 !important;
-            margin: 0 !important;
+        #invoice { 
+            color: #000000 !important; 
+            width: 4.66in !important;
+            height: 7.10in !important;
+            max-height: 7.10in !important;
+            min-height: 7.10in !important;
+            box-sizing: border-box !important;
+            overflow: hidden !important; 
         }
-        .mode-potret #invoice {
-            margin: 0 !important;
-            box-shadow: none !important;
-            border: none !important;
-            max-width: 100% !important;
-        }
-        /* Menyembunyikan border input saat dalam mode potret */
-        .mode-potret input {
-            border: none !important;
-            background: transparent !important;
-        }
-
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
+        input[type=number] { -moz-appearance: textfield; }
+        #stempelLunas {
+            position: absolute;
+            top: 71%; 
+            left: 35%;
+            transform: translate(-50%, -50%) rotate(-14deg); 
+            font-size: 38px;
+            font-weight: 900;
+            color: rgba(220, 38, 38, 0.7); 
+            border: 5px double rgba(220, 38, 38, 0.7); 
+            padding: 2px 22px;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-family: 'Courier New', Courier, monospace; 
+            pointer-events: none; 
+            z-index: 40;
+        }
     </style>
 </head>
 <body class="p-4">
 
-    <!-- Latar Invoice diisi dengan URL Gambar Publik -->
-    <div id="invoice" class="max-w-md mx-auto p-6 shadow-lg border border-gray-200 class-invoice" 
-         style="background-image: url('https://i.postimg.cc/qBYnxRzT/Latar-Invoice-Kamboja.jpg') !important; background-size: cover !important; background-position: center !important; color: #000000 !important; position: relative;">
+    <div id="invoice" class="mx-auto p-5 shadow-lg border border-gray-200 class-invoice" 
+     style="background-image: url('https://i.postimg.cc/dQXdj1LF/Latar-Kwitansi-Kamboja.jpg') !important; background-size: cover !important; background-position: center !important; position: relative;">
         
-        <div class="flex items-center gap-4 mb-6">
-            <!-- Logo Kamboja diisi dengan URL Gambar Publik -->
+        <div id="stempelLunas" class="hidden">LUNAS</div>
+
+        <div class="flex items-center gap-4 mb-5">
             <img src="https://i.postimg.cc/7Pc7n6fD/LOGO-KAMBOJA.png" alt="Logo Kamboja" class="w-16 h-16 object-contain">
             <div>
                 <h1 class="font-bold text-lg" style="color: #000000 !important;">KAMBOJA Printing</h1>
@@ -63,179 +68,298 @@
 
         <div class="p-2 mb-4 text-right font-bold uppercase tracking-wider text-white" 
              style="background-color: #1f2937 !important;">
-            INVOICE
+            KWITANSI
         </div>
         
         <div class="text-xs mb-4" style="color: #000000 !important;">
             <div class="flex items-center gap-1 mb-1">
-                <span class="w-24 text-black">Kepada Yth :</span>
-                <input type="text" id="custName" class="border-b flex-1 outline-none font-bold" placeholder="Nama Pelanggan" 
+                <span class="w-24 text-black">Telah terima dari :</span>
+                <input type="text" id="custName" class="border-b flex-1 outline-none font-bold text-black" placeholder="Nama Pelanggan" 
                        style="background-color: transparent !important; color: #000000 !important; border-bottom-color: #cccccc !important;">
             </div>
             <div class="flex items-center gap-1 mb-1">
                 <span class="w-24 text-black">Invoice no :</span>
-                <input type="text" id="invNumber" class="border-b flex-1 outline-none font-bold" value="INV-2026-001" 
+                <input type="text" id="invNumber" class="border-b flex-1 outline-none font-bold text-black" value="Memuat..." 
                        style="background-color: transparent !important; color: #000000 !important; border-bottom-color: #cccccc !important;">
             </div>
             <div class="flex items-center gap-1">
                 <span class="w-24 text-black">Tanggal :</span>
-                <input type="text" id="invDate" class="border-b flex-1 outline-none font-bold" value="" 
+                <input type="text" id="invDate" class="border-b flex-1 outline-none font-bold text-black" value="" 
                        style="background-color: transparent !important; color: #000000 !important; border-bottom-color: #cccccc !important;">
             </div>
         </div>
 
-        <table class="w-full text-xs mb-6 border-collapse table-fixed">
+        <p class="text-xs font-bold mb-2" style="color: #000000 !important;">Untuk pembayaran :</p>
+
+        <table class="w-full text-xs mb-5 border-collapse table-fixed">
             <thead>
                 <tr style="background-color: rgba(229, 231, 235, 0.8) !important; backdrop-filter: blur(1px);">
                     <th class="p-1 text-center w-[6%]" style="color: #000000 !important;">No.</th>
                     <th class="p-1 text-left w-[42%]" style="color: #000000 !important;">Deskripsi</th>
                     <th class="p-1 text-center w-[12%]" style="color: #000000 !important;">Qty</th>
                     <th class="p-1 text-right w-[18%]" style="color: #000000 !important;">Harga</th>
-                    <th class="p-1 text-right w-[22%]" style="color: #000000 !important;">Total</th>
+                    <th class="p-1 text-right w-[22%]" style="color: #000000 !important;">Sub Total</th>
                 </tr>
             </thead>
             <tbody id="itemsBody">
-                <script>
-                    for(let i=1; i<=5; i++){
-                        document.write(`
-                        <tr style="height: 28px;">
-                            <td class="p-1 border-b text-center row-no" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;">${i}.</td>
-                            <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;">
-                                <input type="text" class="w-full outline-none desc-input" placeholder="Nama Barang ${i}" style="background-color: transparent !important; color: #000000 !important;">
-                            </td>
-                            <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;">
-                                <input type="number" class="w-full text-center outline-none qty-input" placeholder="1" oninput="calculate()" style="background-color: transparent !important; color: #000000 !important;">
-                            </td>
-                            <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;">
-                                <input type="text" inputmode="numeric" class="w-full text-right outline-none price-input" placeholder="0" oninput="calculate()" style="background-color: transparent !important; color: #000000 !important;">
-                            </td>
-                            <td class="p-1 border-b text-right row-total" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;">0</td>
-                        </tr>
-                        `);
-                    }
-                </script>
+                <tr style="height: 28px;">
+                    <td class="p-1 border-b text-center row-no" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;">1.</td>
+                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;">
+                        <input type="text" class="w-full outline-none desc-input text-black" style="background-color: transparent !important; color: #000000 !important;">
+                    </td>
+                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;">
+                        <input type="number" class="w-full text-center outline-none qty-input text-black" oninput="calculate()" style="background-color: transparent !important; color: #000000 !important;">
+                    </td>
+                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;">
+                        <input type="text" inputmode="numeric" class="w-full text-right outline-none price-input text-black" oninput="calculate()" style="background-color: transparent !important; color: #000000 !important;">
+                    </td>
+                    <td class="p-1 border-b text-right row-total font-bold" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;">0</td>
+                </tr>
+                <tr style="height: 28px;">
+                    <td class="p-1 border-b text-center row-no" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;">2.</td>
+                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;"> <input type="text" class="w-full outline-none desc-input text-black" style="background-color: transparent !important; color: #000000 !important;"> </td>
+                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;"> <input type="number" class="w-full text-center outline-none qty-input text-black" oninput="calculate()" style="background-color: transparent !important; color: #000000 !important;"> </td>
+                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;"> <input type="text" inputmode="numeric" class="w-full text-right outline-none price-input text-black" oninput="calculate()" style="background-color: transparent !important; color: #000000 !important;"> </td>
+                    <td class="p-1 border-b text-right row-total font-bold" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;">0</td>
+                </tr>
+                <tr style="height: 28px;">
+                    <td class="p-1 border-b text-center" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;">3.</td>
+                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;"> <input type="text" class="w-full outline-none desc-input text-black" style="background-color: transparent !important; color: #000000 !important;"> </td>
+                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;"> <input type="number" class="w-full text-center outline-none qty-input text-black" oninput="calculate()" style="background-color: transparent !important; color: #000000 !important;"> </td>
+                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;"> <input type="text" inputmode="numeric" class="w-full text-right outline-none price-input text-black" oninput="calculate()" style="background-color: transparent !important; color: #000000 !important;"> </td>
+                    <td class="p-1 border-b text-right row-total font-bold" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;">0</td>
+                </tr>
+                <tr style="height: 28px;">
+                    <td class="p-1 border-b text-center" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;">4.</td>
+                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;"> <input type="text" class="w-full outline-none desc-input text-black" style="background-color: transparent !important; color: #000000 !important;"> </td>
+                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;"> <input type="number" class="w-full text-center outline-none qty-input text-black" oninput="calculate()" style="background-color: transparent !important; color: #000000 !important;"> </td>
+                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;"> <input type="text" inputmode="numeric" class="w-full text-right outline-none price-input text-black" oninput="calculate()" style="background-color: transparent !important; color: #000000 !important;"> </td>
+                    <td class="p-1 border-b text-right row-total font-bold" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;">0</td>
+                </tr>
+                <tr style="height: 28px;">
+                    <td class="p-1 border-b text-center" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;">5.</td>
+                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;"> <input type="text" class="w-full outline-none desc-input text-black" style="background-color: transparent !important; color: #000000 !important;"> </td>
+                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;"> <input type="number" class="w-full text-center outline-none qty-input text-black" oninput="calculate()" style="background-color: transparent !important; color: #000000 !important;"> </td>
+                    <td class="p-1 border-b" style="border-bottom-color: rgba(229, 231, 235, 0.6) !important;"> <input type="text" inputmode="numeric" class="w-full text-right outline-none price-input text-black" oninput="calculate()" style="background-color: transparent !important; color: #000000 !important;"> </td>
+                    <td class="p-1 border-b text-right row-total font-bold" style="color: #000000 !important; border-bottom-color: rgba(229, 231, 235, 0.6) !important;">0</td>
+                </tr>
             </tbody>
         </table>
 
-        <div class="flex justify-end gap-4 font-bold text-sm mb-8" style="color: #000000 !important;">
-            <span>TOTAL</span>
-            <span id="grandTotal" style="color: #000000 !important;">0</span>
+        <div class="flex justify-end text-xs font-bold mb-6" style="color: #000000 !important;">
+            <div class="grid grid-cols-2 gap-y-1 text-right w-36">
+                <div class="pr-1 text-black">TOTAL</div>
+                <div id="grandTotal" class="text-black">0</div>
+                
+                <div class="pr-1 flex items-center justify-end text-black">DP</div>
+                <div>
+                    <input type="text" inputmode="numeric" id="dpAmount" class="w-full text-right outline-none font-bold p-0 text-black" placeholder="" oninput="formatDPAndCalculate()" style="background-color: transparent !important; color: #000000 !important;">
+                </div>
+                
+                <div class="pr-1 text-black">SISA</div>
+                <div id="sisaTotal" class="text-black">0</div>
+            </div>
         </div>
 
-        <p class="font-bold" style="color: #000000 !important; font-size: 10px;">ORDER DIPROSES SETELAH PEMBAYARAN DITERIMA</p>
-        <div class="mt-8 text-right text-xs" style="color: #000000 !important;">
+        <p class="font-bold" style="color: #000000 !important; font-size: 12px;">TERIMA KASIH ATAS KEPERCAYAAN ANDA</p>
+        <div class="mt-6 text-right text-xs" style="color: #000000 !important;">
             <p style="color: #000000 !important;">Hormat Kami,</p>
             <br><br>
             <p class="font-bold" style="color: #000000 !important;">KAMBOJA PRINTING</p>
         </div>
     </div>
 
-    <div id="areaTombol" class="max-w-md mx-auto mt-6 flex px-4">
-        <button id="btnShare" class="flex-1 bg-blue-600 text-white py-2.5 px-6 rounded-lg font-bold text-sm tracking-wide shadow-md active:bg-blue-700 transition-colors">
+    <div id="areaKontrolMenu" class="max-w-md mx-auto mt-4 px-4 relative flex items-center justify-center min-h-[50px]">
+        <button id="btnShare" class="bg-blue-600 text-white py-2.5 px-8 rounded-lg font-bold text-sm tracking-wide shadow-md active:bg-blue-700 transition-colors z-10">
             Simpan / Bagikan
         </button>
     </div>
 
 <script>
-    let autoInvoiceEnabled = true;
-    const invNumberInput = document.getElementById('invNumber');
+        const URL_WEB_APP = "https://script.google.com/macros/s/AKfycby9daU4NZrFOwAmhPjPw_z0TCpFGKI-pvfaHnsmUabBvI3gdfv_rqy-Y6F02w0q9Yo/exec";
 
-    invNumberInput.addEventListener('input', function() { autoInvoiceEnabled = false; });
-    invNumberInput.addEventListener('focus', function() { autoInvoiceEnabled = false; });
+        let globalTotal = 0;
+        let globalDP = 0;
+        let globalSisa = 0;
 
-    function updateInvoiceNumberFromApp(newNumber) {
-        if (autoInvoiceEnabled) {
-            invNumberInput.value = String(newNumber);
-        }
-    }
-
-    function getTanggalHariIni() {
         const hariIni = new Date();
         const opsi = { day: 'numeric', month: 'long', year: 'numeric' };
-        return hariIni.toLocaleDateString('id-ID', opsi);
-    }
+        document.getElementById('invDate').value = hariIni.toLocaleDateString('id-ID', opsi);
 
-    document.addEventListener("DOMContentLoaded", function() {
-        const dateInput = document.getElementById('invDate');
-        if (dateInput && dateInput.value === "") {
-            dateInput.value = getTanggalHariIni();
-        }
-    });
-
-    function calculate() {
-        let rows = document.querySelectorAll('#itemsBody tr');
-        let total = 0;
-        rows.forEach(row => {
-            let qtyInput = row.querySelector('.qty-input');
-            let priceInput = row.querySelector('.price-input');
-            let rowTotal = row.querySelector('.row-total');
-            
-            let qty = parseFloat(qtyInput.value);
-            if (isNaN(qty) || qty < 0) qty = 1;
-            
-            let priceDigits = priceInput.value.replace(/\D/g, '');
-            let price = parseFloat(priceDigits);
-            if (isNaN(price) || price < 0) price = 0;
-            
-            if (priceInput.value !== "" && price > 0) {
-                priceInput.value = price.toLocaleString('id-ID');
-            } else if (price === 0 && priceInput.value !== "") {
-                priceInput.value = "";
-            }
-            
-            let subtotal = qty * price;
-            total += subtotal;
-            rowTotal.innerText = subtotal > 0 ? subtotal.toLocaleString('id-ID') : "0";
+        window.addEventListener('DOMContentLoaded', () => {
+            fetch(`${URL_WEB_APP}?action=getNextInvoice`)
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === "SUCCESS") {
+                    document.getElementById('invNumber').value = data.nextInvoiceNumber;
+                }
+            }).catch(err => {
+                document.getElementById('invNumber').value = "INV-2026-07-101";
+            });
         });
-        document.getElementById('grandTotal').innerText = total > 0 ? total.toLocaleString('id-ID') : "0";
-    }
 
-    document.getElementById('btnShare').addEventListener('click', function() {
-        document.documentElement.classList.add('mode-potret');
-        document.body.classList.add('mode-potret');
+        function calculate() {
+            let rows = document.querySelectorAll('#itemsBody tr');
+            let total = 0;
+            rows.forEach(row => {
+                let qtyInput = row.querySelector('.qty-input');
+                let priceInput = row.querySelector('.price-input');
+                let rowTotal = row.querySelector('.row-total');
+                let qty = parseFloat(qtyInput.value);
+                if (isNaN(qty) || qty < 0) qty = 1;
+                let priceDigits = priceInput.value.replace(/\D/g, '');
+                let price = parseFloat(priceDigits);
+                if (isNaN(price) || price < 0) price = 0;
+                if (priceInput.value !== "" && price > 0) {
+                    priceInput.value = price.toLocaleString('id-ID');
+                }
+                let subtotal = qty * price;
+                total += subtotal;
+                rowTotal.innerText = subtotal > 0 ? subtotal.toLocaleString('id-ID') : "0";
+            });
+            globalTotal = total;
+            document.getElementById('grandTotal').innerText = total > 0 ? total.toLocaleString('id-ID') : "0";
+            updateSisa();
+        }
 
-        let currentInvNumber = document.getElementById('invNumber') ? document.getElementById('invNumber').value : "";
-        let currentName = document.getElementById('custName') ? document.getElementById('custName').value : "";
-        let currentDate = document.getElementById('invDate') ? document.getElementById('invDate').value : "";
-
-        let paketItem = [];
-        let rows = document.querySelectorAll('#itemsBody tr');
-        
-        rows.forEach(row => {
-            let descInput = row.querySelector('.desc-input');
-            let qtyInput = row.querySelector('.qty-input');
-            let priceInput = row.querySelector('.price-input');
-            let rowTotal = row.querySelector('.row-total');
-            
-            let desc = descInput && descInput.value.trim() !== "" ? descInput.value.trim() : "";
-            let qty = qtyInput && qtyInput.value.trim() !== "" ? qtyInput.value.trim() : "1";
-            
-            let priceDigits = priceInput ? priceInput.value.replace(/\D/g, '') : "0";
-            let valPrice = parseFloat(priceDigits);
-            if (isNaN(valPrice)) valPrice = 0;
-            let priceStr = valPrice > 0 ? priceDigits : "";
-
-            if (desc === "" && valPrice === 0) {
-                if(priceInput) priceInput.style.display = 'none';
-                if(qtyInput) qtyInput.style.display = 'none';
-                if(rowTotal) rowTotal.style.display = 'none';
+        function formatDPAndCalculate() {
+            let dpInput = document.getElementById('dpAmount');
+            let digits = dpInput.value.replace(/\D/g, '');
+            let dpValue = parseFloat(digits);
+            if (isNaN(dpValue) || dpValue <= 0) {
+                dpValue = 0;
+                if(dpInput.value !== "") dpInput.value = "";
             } else {
-                paketItem.push(desc + "#" + qty + "#" + priceStr);
+                dpInput.value = dpValue.toLocaleString('id-ID');
             }
-        });
-
-        let stringHasilTabel = paketItem.length > 0 ? paketItem.join('~') : "-";
-
-        if (window.AppInventor && window.AppInventor.setWebViewString) {
-            window.AppInventor.setWebViewString("simpan_data|" + currentInvNumber + "|" + currentName + "|" + currentDate + "|" + stringHasilTabel);
+            updateSisa();
         }
 
-        setTimeout(function() {
-            if (window.AppInventor && window.AppInventor.setWebViewString) {
-                window.AppInventor.setWebViewString("potret_sekarang");
+        function updateSisa() {
+            let dpInput = document.getElementById('dpAmount');
+            let digits = dpInput.value.replace(/\D/g, '');
+            let dpValue = parseFloat(digits);
+            if (isNaN(dpValue)) dpValue = 0;
+            
+            globalDP = dpValue;
+            globalSisa = globalTotal - dpValue;
+            
+            document.getElementById('sisaTotal').innerText = globalSisa !== 0 ? globalSisa.toLocaleString('id-ID') : "0";
+            const stempel = document.getElementById('stempelLunas');
+            if (globalTotal > 0 && dpValue >= globalTotal) {
+                stempel.classList.remove('hidden');
+            } else {
+                stempel.classList.add('hidden');
             }
-        }, 300);
-    });
+        }
+
+        document.getElementById('btnShare').addEventListener('click', function() {
+            let btn = this;
+            btn.disabled = true;
+            btn.innerText = "Memproses...";
+
+            let currentInvNumber = document.getElementById('invNumber').value;
+            let currentName = document.getElementById('custName').value;
+            let currentDate = document.getElementById('invDate').value;
+
+            let itemsArray = [];
+            let rows = document.querySelectorAll('#itemsBody tr');
+            rows.forEach(row => {
+                let desc = row.querySelector('.desc-input').value.trim();
+                let qty = row.querySelector('.qty-input').value.trim() || "1";
+                let price = row.querySelector('.price-input').value.replace(/\D/g, '');
+                if (desc !== "" || price !== "") {
+                    itemsArray.push({ desc: desc, qty: qty, price: price });
+                }
+            });
+
+            let stringItemGabung = itemsArray.map(i => `${i.desc}#${i.qty}#${i.price}`).join(', ');
+
+            // Simpan data formulir ke localStorage untuk invoice.html
+            const invoicePayload = {
+                invNumber: currentInvNumber,
+                custName: currentName,
+                invDate: currentDate,
+                items: itemsArray
+            };
+            localStorage.setItem('pendingInvoiceData', JSON.stringify(invoicePayload));
+
+            // Render Kwitansi menjadi Gambar JPG untuk disimpan di Google Drive
+            const targetInvoice = document.getElementById('invoice');
+            const cloneInvoice = targetInvoice.cloneNode(true);
+            
+            cloneInvoice.style.position = "fixed";
+            cloneInvoice.style.top = "0";
+            cloneInvoice.style.left = "-9999px"; 
+            document.body.appendChild(cloneInvoice);
+
+            const originalInputs = targetInvoice.querySelectorAll('input');
+            const clonedInputs = cloneInvoice.querySelectorAll('input');
+
+            clonedInputs.forEach((clonedInput, index) => {
+                const originalValue = originalInputs[index].value;
+                const parent = clonedInput.parentNode;
+                const textSpan = document.createElement('span');
+                
+                textSpan.innerText = originalValue || "";
+                textSpan.className = clonedInput.className;
+                textSpan.style.display = "inline-block";
+                textSpan.style.color = "#000000";
+                textSpan.style.fontWeight = "bold";
+                
+                parent.replaceChild(textSpan, clonedInput);
+            });
+
+            const originalStempel = document.getElementById('stempelLunas');
+            const clonedStempel = cloneInvoice.querySelector('#stempelLunas');
+            if (originalStempel.classList.contains('hidden')) {
+                clonedStempel.classList.add('hidden');
+            } else {
+                clonedStempel.classList.remove('hidden');
+            }
+
+            html2canvas(cloneInvoice, {
+                useCORS: true,
+                scale: 2,
+                logging: false,
+                backgroundColor: "#ffffff"
+            }).then(canvas => {
+                let base64Image = canvas.toDataURL('image/jpeg', 0.95);
+                document.body.removeChild(cloneInvoice);
+
+                let payload = {
+                    action: "saveInvoiceAll",
+                    image: base64Image,
+                    invNumber: currentInvNumber,
+                    custName: currentName,
+                    invDate: currentDate,
+                    items: stringItemGabung,
+                    dp: globalDP,
+                    totalHarga: globalTotal,
+                    sisa: globalSisa
+                };
+
+                return fetch(URL_WEB_APP, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+            }).then(response => response.json())
+            .then(resData => {
+                if(resData.status === "SUCCESS") {
+                    // Pindah ke Halaman Invoice untuk Unduh Gambar Lokal
+                    window.location.href = "invoice.html";
+                } else {
+                    alert('Gagal menyimpan: ' + resData.message);
+                    btn.disabled = false;
+                    btn.innerText = "Simpan / Bagikan";
+                }
+            }).catch(error => {
+                alert('Terjadi kesalahan koneksi sistem.');
+                btn.disabled = false;
+                btn.innerText = "Simpan / Bagikan";
+            });
+        });
 </script>
 </body>
 </html>
