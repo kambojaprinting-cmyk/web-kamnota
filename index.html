@@ -254,20 +254,56 @@
         const opsi = { day: 'numeric', month: 'long', year: 'numeric' };
         document.getElementById('invDate').value = hariIni.toLocaleDateString('id-ID', opsi);
 
+        // ========================================================
+        // FUNGSI API & AUTO RUN SAAT HALAMAN DIMUAT
+        // ========================================================
         window.addEventListener('DOMContentLoaded', () => {
-            fetch(`${URL_WEB_APP}?action=getNextInvoice`)
-            .then(res => res.json())
-            .then(data => {
-                if(data.status === "SUCCESS") {
-                    document.getElementById('invNumber').value = data.nextInvoiceNumber;
-                }
-            }).catch(err => {
-                document.getElementById('invNumber').value = "INV-2026-07-101";
-            });
+            const params = new URLSearchParams(window.location.search);
+            
+            // Cek apakah ada pemicu otomatis via URL (?autoRun=true)
+            if (params.get('autoRun') === 'true') {
+                loadInvoiceTerakhirAndExecute();
+            } else {
+                // Panggilan nomor invoice biasa untuk manual
+                fetch(`${URL_WEB_APP}?action=getNextInvoice`)
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === "SUCCESS") {
+                        document.getElementById('invNumber').value = data.nextInvoiceNumber;
+                    }
+                }).catch(err => {
+                    document.getElementById('invNumber').value = "INV-2026-07-101";
+                });
+            }
         });
 
+        // FUNGSI PANGGILAN API UNTUK MENGAMBIL DATA TERAKHIR DARI GOOGLE SHEETS
+        async function loadInvoiceTerakhirAndExecute() {
+            try {
+                const response = await fetch(`${URL_WEB_APP}?action=getAllInvoices`);
+                const result = await response.json();
+                
+                if (result.status === "SUCCESS" && result.data && result.data.length > 0) {
+                    // Ambil baris data paling terakhir
+                    const lastInvoice = result.data[result.data.length - 1];
+                    
+                    // 1. Isi Form
+                    if (lastInvoice.invNumber) document.getElementById('invNumber').value = lastInvoice.invNumber;
+                    if (lastInvoice.custName) document.getElementById('custName').value = lastInvoice.custName;
+                    if (lastInvoice.invDate) document.getElementById('invDate').value = lastInvoice.invDate;
+                    
+                    // 2. Eksekusi Tombol Simpan/Bagikan Secara Otomatis
+                    setTimeout(() => {
+                        document.getElementById('btnShare').click();
+                    }, 500);
+                }
+            } catch (err) {
+                console.error("Gagal memuat data dari API Apps Script:", err);
+            }
+        }
+
         // ==========================================
-        // FUNGSI PEMPROSESAN DATA INVOICE (SUDAH DIPERBAIKI)
+        // FUNGSI PEMPROSESAN DATA INVOICE
         // ==========================================
         function prosesInvoice(aksi) {
             // 1. Hilangkan placeholder jika aksi 'bagikan'
