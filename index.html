@@ -255,14 +255,16 @@
         document.getElementById('invDate').value = hariIni.toLocaleDateString('id-ID', opsi);
 
         // ========================================================
-        // DUKUNGAN AUTORUN (TANPA MENGUBAH EKSEKUSI UTAMA)
+        // FUNGSI API & AUTO RUN SAAT HALAMAN DIMUAT
         // ========================================================
         window.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
             
+            // Cek apakah ada pemicu otomatis via URL (?autoRun=true)
             if (params.get('autoRun') === 'true') {
                 loadInvoiceTerakhirAndExecute();
             } else {
+                // Panggilan nomor invoice biasa untuk manual
                 fetch(`${URL_WEB_APP}?action=getNextInvoice`)
                 .then(res => res.json())
                 .then(data => {
@@ -275,51 +277,165 @@
             }
         });
 
-        async function loadInvoiceTerakhirAndExecute() {
-            try {
-                const response = await fetch(`${URL_WEB_APP}?action=getAllInvoices`);
-                const result = await response.json();
-                
-                if (result.status === "SUCCESS" && result.data && result.data.length > 0) {
-                    const lastInvoice = result.data[result.data.length - 1];
-                    
-                    if (lastInvoice.invNumber) document.getElementById('invNumber').value = lastInvoice.invNumber;
-                    if (lastInvoice.custName) document.getElementById('custName').value = lastInvoice.custName;
-                    if (lastInvoice.invDate) document.getElementById('invDate').value = lastInvoice.invDate;
-                    
-                    if (lastInvoice.dp && document.getElementById('dpAmount')) {
-                        document.getElementById('dpAmount').value = lastInvoice.dp;
-                    }
-
-                    if (lastInvoice.item && lastInvoice.item.includes('#')) {
-                        const parts = lastInvoice.item.split('#');
-                        const desc = parts[0] || "";
-                        const qty = parts[1] || "1";
-                        const price = parts[2] || "0";
-
-                        let firstRowKwitansi = document.querySelector('#itemsBody tr');
-                        if (firstRowKwitansi) {
-                            let descInput = firstRowKwitansi.querySelector('.desc-input');
-                            let qtyInput = firstRowKwitansi.querySelector('.qty-input');
-                            let priceInput = firstRowKwitansi.querySelector('.price-input');
-
-                            if (descInput) descInput.value = desc;
-                            if (qtyInput) qtyInput.value = qty;
-                            if (priceInput) priceInput.value = price;
-                        }
-                    }
-
-                    if (typeof calculate === 'function') calculate();
-                    if (typeof formatDPAndCalculate === 'function') formatDPAndCalculate();
-
-                    setTimeout(() => {
-                        const btnShare = document.getElementById('btnShare');
-                        if (btnShare) btnShare.click();
-                    }, 500);
-                }
-            } catch (err) {
-                console.error("Gagal autoRun:", err);
+        // FUNGSI PANGGILAN API UNTUK MENGAMBIL DATA TERAKHIR DARI GOOGLE SHEETS
+        // FUNGSI PERBAIKAN TOTAL UNTUK AUTO-RUN
+async function loadInvoiceTerakhirAndExecute() {
+    try {
+        const response = await fetch(`${URL_WEB_APP}?action=getAllInvoices`);
+        const result = await response.json();
+        
+        if (result.status === "SUCCESS" && result.data && result.data.length > 0) {
+            const lastInvoice = result.data[result.data.length - 1];
+            
+            // 1. Isi Header
+            if (lastInvoice.invNumber) document.getElementById('invNumber').value = lastInvoice.invNumber;
+            if (lastInvoice.custName) document.getElementById('custName').value = lastInvoice.custName;
+            if (lastInvoice.invDate) document.getElementById('invDate').value = lastInvoice.invDate;
+            
+            if (lastInvoice.dp && document.getElementById('dpAmount')) {
+                document.getElementById('dpAmount').value = lastInvoice.dp;
             }
+
+            // 2. Breakdown Item (Format: NamaBarang#Qty#Harga)
+            if (lastInvoice.item && lastInvoice.item.includes('#')) {
+                const parts = lastInvoice.item.split('#');
+                const desc = parts[0] || "";
+                const qty = parts[1] || "1";
+                const price = parts[2] || "0";
+
+                // A. ISI TABEL KWITANSI (FORM UTAMA)
+                let firstRowKwitansi = document.querySelector('#itemsBody tr');
+                if (firstRowKwitansi) {
+                    let descInput = firstRowKwitansi.querySelector('.desc-input');
+                    let qtyInput = firstRowKwitansi.querySelector('.qty-input');
+                    let priceInput = firstRowKwitansi.querySelector('.price-input');
+
+                    if (descInput) descInput.value = desc;
+                    if (qtyInput) qtyInput.value = qty;
+                    if (priceInput) priceInput.value = price;
+                }
+
+                // B. ISI LANGSUNG TABEL INVOICE (TEMPLATE TERSEMBUNYI)
+                let firstRowInvoice = document.querySelector('#invTargetItemsBody tr');
+                if (firstRowInvoice) {
+                    let targetDesc = firstRowInvoice.querySelector('.target-desc');
+                    let targetQty = firstRowInvoice.querySelector('.target-qty');
+                    let targetPrice = firstRowInvoice.querySelector('.target-price');
+                    let targetTotal = firstRowInvoice.querySelector('.target-total');
+
+                    const valPrice = parseFloat(price) || 0;
+                    const valQty = parseFloat(qty) || 1;
+                    const subtotal = valQty * valPrice;
+
+                    if (targetDesc) targetDesc.innerText = desc;
+                    if (targetQty) targetQty.innerText = qty;
+                    if (targetPrice) targetPrice.innerText = valPrice > 0 ? valPrice.toLocaleString('id-ID') : "";
+                    if (targetTotal) targetTotal.innerText = subtotal > 0 ? subtotal.toLocaleString('id-ID') : "0";
+                }
+            }
+
+            // 3. Pemicu Kalkulasi Matematika
+            if (typeof calculate === 'function') calculate();
+            if (typeof formatDPAndCalculate === 'function') formatDPAndCalculate();
+
+            // 4. Beri jeda 800ms agar DOM & HTML2Canvas sempat membaca teks sebelum di-render
+            setTimeout(() => {
+                const btnShare = document.getElementById('btnShare');
+                if (btnShare) btnShare.click();
+            }, 800);
+        }
+    } catch (err) {
+        console.error("Gagal memuat data dari API Apps Script:", err);
+    }
+}
+
+        // ==========================================
+        // FUNGSI PEMPROSESAN DATA INVOICE
+        // ==========================================
+        function prosesInvoice(aksi) {
+            // 1. Hilangkan placeholder jika aksi 'bagikan'
+            if (aksi === 'bagikan') {
+                let textInputs = document.querySelectorAll('#itemsBody .desc-input');
+                textInputs.forEach(input => {
+                    if (input.value.trim() === "") {
+                        input.setAttribute('data-old-placeholder', input.placeholder);
+                        input.placeholder = "";
+                    }
+                });
+            }
+
+            // 2. Ambil nilai dasar
+            let currentInvNumber = document.getElementById('invNumber') ? document.getElementById('invNumber').value : "";
+            let currentName = document.getElementById('custName') ? document.getElementById('custName').value : "";
+            let currentDate = document.getElementById('invDate') ? document.getElementById('invDate').value : "";
+
+            // 3. Ambil nilai DP
+            let dpInput = document.getElementById('dpAmount');
+            let dpDigits = "0";
+            if (dpInput && dpInput.value.trim() !== "") {
+                dpDigits = dpInput.value.replace(/\D/g, '') || "0";
+            }
+
+            // 4. Susun Paket Item
+            let paketItem = [];
+            let rows = document.querySelectorAll('#itemsBody tr');
+            
+            rows.forEach(row => {
+                let descInput = row.querySelector('.desc-input');
+                let qtyInput = row.querySelector('.qty-input');
+                let priceInput = row.querySelector('.price-input');
+                let rowTotal = row.querySelector('.row-total');
+                
+                let desc = descInput && descInput.value.trim() !== "" ? descInput.value.trim() : "";
+                let qty = qtyInput && qtyInput.value.trim() !== "" ? qtyInput.value.trim() : "1";
+                
+                let priceDigits = priceInput ? priceInput.value.replace(/\D/g, '') : "0";
+                let valPrice = parseFloat(priceDigits);
+                if (isNaN(valPrice)) valPrice = 0;
+                let priceStr = valPrice > 0 ? priceDigits : "";
+
+                if (desc === "" && valPrice === 0) {
+                    if (aksi === 'bagikan') {
+                        if (priceInput) priceInput.style.visibility = 'hidden';
+                        if (qtyInput) qtyInput.style.visibility = 'hidden';
+                        if (rowTotal) rowTotal.style.visibility = 'hidden';
+                    }
+                } else {
+                    paketItem.push(desc + "#" + qty + "#" + priceStr);
+                }
+            });
+
+            let stringHasilTabel = paketItem.length > 0 ? paketItem.join('~') : "-";
+            let grandTotalElem = document.getElementById('grandTotal');
+            let teksTotal = grandTotalElem ? grandTotalElem.innerText : "0";
+            let totalHarga = teksTotal.replace(/\D/g, '');
+            if (totalHarga === "") totalHarga = "0";
+
+            let noHp = "-";
+
+            // 5. JIKA DIBUKA VIA APP INVENTOR (ANDROID APP)
+            if (window.AppInventor && window.AppInventor.setWebViewString) {
+                window.AppInventor.setWebViewString("simpan_data|" + currentInvNumber + "|" + currentName + "|" + currentDate + "|" + stringHasilTabel + "|" + dpDigits + "|" + totalHarga + "|" + noHp);
+
+                if (aksi === 'bagikan') {
+                    setTimeout(function() {
+                        if (window.AppInventor && window.AppInventor.setWebViewString) {
+                            window.AppInventor.setWebViewString("potret_sekarang");
+                        }
+                    }, 100);
+                }
+            }
+
+            // 6. JIKA DIBUKA VIA PUPPETEER (VERCEL / AKSITA AI)
+            return {
+                status: "SUCCESS",
+                invNumber: currentInvNumber,
+                custName: currentName,
+                invDate: currentDate,
+                items: stringHasilTabel,
+                dp: parseInt(dpDigits) || 0,
+                total: parseInt(totalHarga) || 0
+            };
         }
 
         function calculate() {
@@ -377,163 +493,154 @@
             }
         }
 
-        // ========================================================
-        // PROSES UTAMA (PERSIS 100% SEPERTI KODE LAMA ANDA)
-        // ========================================================
         document.getElementById('btnShare').addEventListener('click', async function() {
-    let btn = this;
-    if (btn.disabled) return; // Mencegah double click
-    btn.disabled = true;
-    btn.innerText = "Memproses...";
+            let btn = this;
+            btn.disabled = true;
+            btn.innerText = "Memproses...";
 
-    let currentInvNumber = document.getElementById('invNumber').value;
-    let currentName = document.getElementById('custName').value;
-    let currentDate = document.getElementById('invDate').value;
+            // Panggil fungsi prosesInvoice sebelum eksekusi lanjutan
+            prosesInvoice('bagikan');
 
-    // 1. SALIN DATA FORM KE TEMPLATE INVOICE
-    document.getElementById('invTargetCustName').innerText = currentName;
-    document.getElementById('invTargetInvNumber').innerText = currentInvNumber;
-    document.getElementById('invTargetInvDate').innerText = currentDate;
+            let currentInvNumber = document.getElementById('invNumber').value;
+            let currentName = document.getElementById('custName').value;
+            let currentDate = document.getElementById('invDate').value;
 
-    let paketItem = [];
-    let rowsKwitansi = document.querySelectorAll('#itemsBody tr');
-    let rowsInvoice = document.querySelectorAll('#invTargetItemsBody tr');
+            // 1. SALIN DATA FORM KE TEMPLATE INVOICE
+            document.getElementById('invTargetCustName').innerText = currentName;
+            document.getElementById('invTargetInvNumber').innerText = currentInvNumber;
+            document.getElementById('invTargetInvDate').innerText = currentDate;
 
-    rowsKwitansi.forEach((row, idx) => {
-        let desc = row.querySelector('.desc-input').value.trim();
-        let qty = row.querySelector('.qty-input').value.trim();
-        let priceInput = row.querySelector('.price-input').value.replace(/\D/g, '');
-        let price = parseFloat(priceInput) || 0;
+            let paketItem = [];
+            let rowsKwitansi = document.querySelectorAll('#itemsBody tr');
+            let rowsInvoice = document.querySelectorAll('#invTargetItemsBody tr');
 
-        if (rowsInvoice[idx]) {
-            rowsInvoice[idx].querySelector('.target-desc').innerText = desc;
-            rowsInvoice[idx].querySelector('.target-qty').innerText = desc ? (qty || "1") : "";
-            rowsInvoice[idx].querySelector('.target-price').innerText = price > 0 ? price.toLocaleString('id-ID') : "";
+            rowsKwitansi.forEach((row, idx) => {
+                let desc = row.querySelector('.desc-input').value.trim();
+                let qty = row.querySelector('.qty-input').value.trim();
+                let priceInput = row.querySelector('.price-input').value.replace(/\D/g, '');
+                let price = parseFloat(priceInput) || 0;
+
+                if (rowsInvoice[idx]) {
+                    rowsInvoice[idx].querySelector('.target-desc').innerText = desc;
+                    rowsInvoice[idx].querySelector('.target-qty').innerText = desc ? (qty || "1") : "";
+                    rowsInvoice[idx].querySelector('.target-price').innerText = price > 0 ? price.toLocaleString('id-ID') : "";
+                    
+                    let sub = (parseFloat(qty) || 1) * price;
+                    rowsInvoice[idx].querySelector('.target-total').innerText = sub > 0 ? sub.toLocaleString('id-ID') : "0";
+                }
+
+                if (desc !== "" || price > 0) {
+                    paketItem.push(`${desc}#${qty || "1"}#${priceInput}`);
+                }
+            });
+
+            document.getElementById('invTargetGrandTotal').innerText = globalTotal > 0 ? globalTotal.toLocaleString('id-ID') : "0";
+            let stringItemGabung = paketItem.join(', ');
+
+            // 2. GENERATE GAMBAR INVOICE LOKAL DAN BASE64 UNTUK DRIVE
+            let base64Invoice = "";
+            const targetInvoice = document.getElementById('invoiceCard');
+            try {
+                const canvasInv = await html2canvas(targetInvoice, {
+                    useCORS: true,
+                    scale: 2,
+                    logging: false,
+                    backgroundColor: "#ffffff"
+                });
+
+                base64Invoice = canvasInv.toDataURL('image/jpeg', 0.95);
+                
+                // Pemicu Unduhan Lokal
+                let linkInv = document.createElement('a');
+                linkInv.href = base64Invoice;
+                linkInv.download = `${currentInvNumber}.jpg`;
+                document.body.appendChild(linkInv);
+                linkInv.click();
+                document.body.removeChild(linkInv);
+            } catch (err) {
+                console.error("Gagal membuat gambar Invoice lokal:", err);
+            }
+
+            // 3. GENERATE GAMBAR KWITANSI
+            const targetKwitansi = document.getElementById('kwitansiCard');
+            const cloneKwitansi = targetKwitansi.cloneNode(true);
             
-            let sub = (parseFloat(qty) || 1) * price;
-            rowsInvoice[idx].querySelector('.target-total').innerText = sub > 0 ? sub.toLocaleString('id-ID') : "0";
-        }
+            cloneKwitansi.style.position = "fixed";
+            cloneKwitansi.style.top = "0";
+            cloneKwitansi.style.left = "-9999px"; 
+            document.body.appendChild(cloneKwitansi);
 
-        if (desc !== "" || price > 0) {
-            paketItem.push(`${desc}#${qty || "1"}#${priceInput}`);
-        }
-    });
+            const originalInputs = targetKwitansi.querySelectorAll('input');
+            const clonedInputs = cloneKwitansi.querySelectorAll('input');
 
-    document.getElementById('invTargetGrandTotal').innerText = globalTotal > 0 ? globalTotal.toLocaleString('id-ID') : "0";
-    let stringItemGabung = paketItem.join(', ');
+            clonedInputs.forEach((clonedInput, index) => {
+                const originalValue = originalInputs[index].value;
+                const parent = clonedInput.parentNode;
+                const textSpan = document.createElement('span');
+                
+                textSpan.innerText = originalValue || "";
+                textSpan.className = clonedInput.className;
+                textSpan.style.display = "inline-block";
+                textSpan.style.color = "#000000";
+                textSpan.style.fontWeight = "bold";
+                
+                parent.replaceChild(textSpan, clonedInput);
+            });
 
-    try {
-        // 2. GENERATE GAMBAR INVOICE (Diperbaiki agar terbaca oleh html2canvas)
-        const wrapperInvoice = document.getElementById('renderInvoiceWrapper');
-        wrapperInvoice.style.position = "fixed";
-        wrapperInvoice.style.top = "0";
-        wrapperInvoice.style.left = "0";
-        wrapperInvoice.style.zIndex = "-9999"; // Tersembunyi di belakang layar tapi tetap di-render DOM
+            const originalStempel = document.getElementById('stempelLunas');
+            const clonedStempel = cloneKwitansi.querySelector('#stempelLunas');
+            if (originalStempel.classList.contains('hidden')) {
+                clonedStempel.classList.add('hidden');
+            } else {
+                clonedStempel.classList.remove('hidden');
+            }
 
-        const targetInvoice = document.getElementById('invoiceCard');
-        const canvasInv = await html2canvas(targetInvoice, {
-            useCORS: true,
-            scale: 2,
-            logging: false,
-            backgroundColor: "#ffffff"
+            try {
+                const canvasKwitansi = await html2canvas(cloneKwitansi, {
+                    useCORS: true,
+                    scale: 2,
+                    logging: false,
+                    backgroundColor: "#ffffff"
+                });
+
+                let base64Kwitansi = canvasKwitansi.toDataURL('image/jpeg', 0.95);
+                document.body.removeChild(cloneKwitansi);
+
+                let payload = {
+                    action: "saveInvoiceAll",
+                    image: base64Kwitansi,            
+                    invoiceImage: base64Invoice,      
+                    invNumber: currentInvNumber,
+                    custName: currentName,
+                    invDate: currentDate,
+                    items: stringItemGabung,
+                    dp: globalDP,
+                    totalHarga: globalTotal,
+                    sisa: globalSisa
+                };
+
+                let response = await fetch(URL_WEB_APP, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+                
+                let resData = await response.json();
+
+                if(resData.status === "SUCCESS") {
+                    alert(`Sukses!\n- Kwitansi tersimpan di Drive.\n- Invoice tersimpan di Drive.\n- Invoice (${currentInvNumber}.jpg) terunduh ke lokal.`);
+                    window.location.reload();
+                } else {
+                    alert('Gagal menyimpan ke Drive: ' + resData.message);
+                    btn.disabled = false;
+                    btn.innerText = "Simpan / Bagikan";
+                }
+            } catch (error) {
+                alert('Terjadi kesalahan koneksi sistem.');
+                btn.disabled = false;
+                btn.innerText = "Simpan / Bagikan";
+            }
         });
-
-        // Kembalikan ke posisi awal
-        wrapperInvoice.style.position = "absolute";
-        wrapperInvoice.style.top = "-9999px";
-        wrapperInvoice.style.left = "-9999px";
-
-        let base64Invoice = canvasInv.toDataURL('image/jpeg', 0.95);
-        
-        // Pemicu Unduhan Lokal Invoice
-        let linkInv = document.createElement('a');
-        linkInv.href = base64Invoice;
-        linkInv.download = `${currentInvNumber}.jpg`;
-        document.body.appendChild(linkInv);
-        linkInv.click();
-        document.body.removeChild(linkInv);
-
-        // 3. GENERATE GAMBAR KWITANSI
-        const targetKwitansi = document.getElementById('kwitansiCard');
-        const cloneKwitansi = targetKwitansi.cloneNode(true);
-        
-        cloneKwitansi.style.position = "fixed";
-        cloneKwitansi.style.top = "0";
-        cloneKwitansi.style.left = "-9999px"; 
-        document.body.appendChild(cloneKwitansi);
-
-        const originalInputs = targetKwitansi.querySelectorAll('input');
-        const clonedInputs = cloneKwitansi.querySelectorAll('input');
-
-        clonedInputs.forEach((clonedInput, index) => {
-            const originalValue = originalInputs[index].value;
-            const parent = clonedInput.parentNode;
-            const textSpan = document.createElement('span');
-            
-            textSpan.innerText = originalValue || "";
-            textSpan.className = clonedInput.className;
-            textSpan.style.display = "inline-block";
-            textSpan.style.color = "#000000";
-            textSpan.style.fontWeight = "bold";
-            
-            parent.replaceChild(textSpan, clonedInput);
-        });
-
-        const originalStempel = document.getElementById('stempelLunas');
-        const clonedStempel = cloneKwitansi.querySelector('#stempelLunas');
-        if (originalStempel.classList.contains('hidden')) {
-            clonedStempel.classList.add('hidden');
-        } else {
-            clonedStempel.classList.remove('hidden');
-        }
-
-        const canvasKwitansi = await html2canvas(cloneKwitansi, {
-            useCORS: true,
-            scale: 2,
-            logging: false,
-            backgroundColor: "#ffffff"
-        });
-
-        let base64Kwitansi = canvasKwitansi.toDataURL('image/jpeg', 0.95);
-        document.body.removeChild(cloneKwitansi);
-
-        // 4. KIRIM DATA KE GOOGLE APPS SCRIPT
-        let payload = {
-            action: "saveInvoiceAll",
-            image: base64Kwitansi,            // Kwitansi
-            invoiceImage: base64Invoice,      // Invoice
-            invNumber: currentInvNumber,
-            custName: currentName,
-            invDate: currentDate,
-            items: stringItemGabung,
-            dp: globalDP,
-            totalHarga: globalTotal,
-            sisa: globalSisa
-        };
-
-        let response = await fetch(URL_WEB_APP, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(payload)
-        });
-        
-        let resData = await response.json();
-
-        if(resData.status === "SUCCESS") {
-            alert(resData.message);
-            window.location.reload();
-        } else {
-            alert('Gagal: ' + resData.message);
-            btn.disabled = false;
-            btn.innerText = "Simpan / Bagikan";
-        }
-    } catch (error) {
-        alert('Terjadi kesalahan saat memproses gambar.');
-        console.error(error);
-        btn.disabled = false;
-        btn.innerText = "Simpan / Bagikan";
-    }
-});
 </script>
 </body>
 </html>
