@@ -10,10 +10,10 @@
 <body class="p-4" style="background-color: #f3f4f6 !important;">
 
     <div id="invoice" class="max-w-md mx-auto p-6 shadow-lg border border-gray-200 class-invoice" 
-         style="background-image: url('LatarInvoiceKamboja.jpg') !important; background-size: cover !important; background-position: center !important; color: #000000 !important; position: relative;">
+         style="background-image: url('https://i.postimg.cc/qBYnxRzT/Latar-Invoice-Kamboja.jpg') !important; background-size: cover !important; background-position: center !important; color: #000000 !important; position: relative;">
         
         <div class="flex items-center gap-4 mb-6">
-            <img src="http://localhost/LOGO_KAMBOJA.png" alt="Logo Kamboja" class="w-16 h-16 object-contain">
+            <img src="https://i.postimg.cc/7Pc7n6fD/LOGO-KAMBOJA.png" alt="Logo Kamboja" class="w-16 h-16 object-contain">
             <div>
                 <h1 class="font-bold text-lg" style="color: #000000 !important;">KAMBOJA Printing</h1>
                 <p class="text-xs" style="color: #000000 !important;">Jl. Tanjungpura Gang Kamboja Kios No. 3 Pontianak - Kalbar</p>
@@ -182,7 +182,6 @@
             const dateInput = document.getElementById('invDate');
             const tanggalHariIni = getTanggalHariIni();
 
-            // Sembunyikan kembali baris yang tadinya tersembunyi jika memuat data baru
             let rows = document.querySelectorAll('#itemsBody tr');
             rows.forEach(row => row.style.display = "");
 
@@ -210,7 +209,7 @@
 		function clearInvoiceTable() {
             let rows = document.querySelectorAll('#itemsBody tr');
             rows.forEach(row => {
-                row.style.display = ""; // Tampilkan semua baris
+                row.style.display = "";
                 row.querySelector('.desc-input').value = "";
                 row.querySelector('.qty-input').value = "";
                 row.querySelector('.price-input').value = "";
@@ -303,18 +302,16 @@
                 let priceStr = valPrice > 0 ? priceDigits : "";
 
                 if (desc === "" && valPrice === 0) {
-                    // Sembunyikan baris kosong saat aksi bagikan (potret)
                     if (aksi === 'bagikan') {
                         row.style.display = 'none';
                     }
                 } else {
-                    row.style.display = ''; // Pastikan baris terisi tetap tampil
+                    row.style.display = '';
                     if (rowNo) rowNo.innerText = nomorUrutDisplay + ".";
                     nomorUrutDisplay++;
                     paketItem.push(desc + "#" + qty + "#" + priceStr);
                 }
 
-                // Hilangkan placeholder jika mau dipotret
                 if (aksi === 'bagikan') {
                     if (descInput) descInput.placeholder = "";
                     if (qtyInput) qtyInput.placeholder = "";
