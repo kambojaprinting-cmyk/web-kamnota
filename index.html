@@ -370,23 +370,8 @@ async function loadInvoiceTerakhirAndExecute() {
             let digits = dpInput.value.replace(/\D/g, '');
             let dpValue = parseFloat(digits);
             if (isNaN(dpValue)) dpValue = 0;
-            
-            globalDP = dpValue;
-            globalSisa = globalTotal - dpValue;
-            
-            document.getElementById('sisaTotal').innerText = globalSisa !== 0 ? globalSisa.toLocaleString('id-ID') : "0";
-            const stempel = document.getElementById('stempelLunas');
-            if (globalTotal > 0 && dpValue >= globalTotal) {
-                stempel.classList.remove('hidden');
-            } else {
-                stempel.classList.add('hidden');
-            }
-        }
 
-        document.getElementById('btnShare').addEventListener('click', async function() {
-            if (isProcessing) return;
-
-            // --- FUNGSI DETEKSI DAN KOREKSI OTOMATIS DP ---
+            // --- DETEKSI KATEGORI & COREKSI MINIMAL DP ---
             if (globalTotal > 0) {
                 let combinedDesc = "";
                 document.querySelectorAll('#itemsBody .desc-input').forEach(input => {
@@ -403,14 +388,27 @@ async function loadInvoiceTerakhirAndExecute() {
 
                 const minNominalDP = (minPersen / 100) * globalTotal;
 
-                if (globalDP < minNominalDP) {
-                    globalDP = minNominalDP;
-                    document.getElementById('dpAmount').value = globalDP.toLocaleString('id-ID');
-                    updateSisa();
+                if (dpValue < minNominalDP) {
+                    dpValue = minNominalDP;
+                    dpInput.value = dpValue.toLocaleString('id-ID');
                 }
             }
-            // --- END FUNGSI DETEKSI DAN KOREKSI OTOMATIS DP ---
+            // --- END DETEKSI & KOREKSI MINIMAL DP ---
 
+            globalDP = dpValue;
+            globalSisa = globalTotal - dpValue;
+            
+            document.getElementById('sisaTotal').innerText = globalSisa !== 0 ? globalSisa.toLocaleString('id-ID') : "0";
+            const stempel = document.getElementById('stempelLunas');
+            if (globalTotal > 0 && dpValue >= globalTotal) {
+                stempel.classList.remove('hidden');
+            } else {
+                stempel.classList.add('hidden');
+            }
+        }
+
+        document.getElementById('btnShare').addEventListener('click', async function() {
+            if (isProcessing) return;
             isProcessing = true;
 
             let btn = this;
