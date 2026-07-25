@@ -386,40 +386,30 @@ async function loadInvoiceTerakhirAndExecute() {
         document.getElementById('btnShare').addEventListener('click', async function() {
             if (isProcessing) return;
 
-            // --- FUNGSI VALIDASI DP ---
-            if (globalTotal <= 0) {
-                alert("Total transaksi harus lebih besar dari 0!");
-                return;
+            // --- FUNGSI DETEKSI DAN KOREKSI OTOMATIS DP ---
+            if (globalTotal > 0) {
+                let combinedDesc = "";
+                document.querySelectorAll('#itemsBody .desc-input').forEach(input => {
+                    combinedDesc += " " + input.value.toLowerCase();
+                });
+
+                const isYasin = combinedDesc.includes("yasin");
+                const isSablonKaosDanBahan = combinedDesc.includes("sablon kaos") && combinedDesc.includes("bahan");
+
+                let minPersen = 50;
+                if (isYasin || isSablonKaosDanBahan) {
+                    minPersen = 75;
+                }
+
+                const minNominalDP = (minPersen / 100) * globalTotal;
+
+                if (globalDP < minNominalDP) {
+                    globalDP = minNominalDP;
+                    document.getElementById('dpAmount').value = globalDP.toLocaleString('id-ID');
+                    updateSisa();
+                }
             }
-
-            let combinedDesc = "";
-            document.querySelectorAll('#itemsBody .desc-input').forEach(input => {
-                combinedDesc += " " + input.value.toLowerCase();
-            });
-
-            const isYasin = combinedDesc.includes("yasin");
-            const isSablonKaosDanBahan = combinedDesc.includes("sablon kaos") && combinedDesc.includes("bahan");
-
-            let minPersen = 50;
-            let kategoriInfo = "Umum (Minimal DP 50%)";
-
-            if (isYasin || isSablonKaosDanBahan) {
-                minPersen = 75;
-                kategoriInfo = "Yasin / Sablon Kaos + Bahan (Minimal DP 75%)";
-            }
-
-            const minNominalDP = (minPersen / 100) * globalTotal;
-
-            if (globalDP <= 0) {
-                alert("DP tidak boleh Rp 0!\nPembayaran wajib menggunakan DP.");
-                return;
-            }
-
-            if (globalDP < minNominalDP) {
-                alert(`DP Kurang!\nKategori: ${kategoriInfo}\nMinimal DP: Rp ${minNominalDP.toLocaleString('id-ID')}\nDP Anda: Rp ${globalDP.toLocaleString('id-ID')}`);
-                return;
-            }
-            // --- END FUNGSI VALIDASI DP ---
+            // --- END FUNGSI DETEKSI DAN KOREKSI OTOMATIS DP ---
 
             isProcessing = true;
 
