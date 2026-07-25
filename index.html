@@ -370,31 +370,7 @@ async function loadInvoiceTerakhirAndExecute() {
             let digits = dpInput.value.replace(/\D/g, '');
             let dpValue = parseFloat(digits);
             if (isNaN(dpValue)) dpValue = 0;
-
-            // --- DETEKSI KATEGORI & COREKSI MINIMAL DP ---
-            if (globalTotal > 0) {
-                let combinedDesc = "";
-                document.querySelectorAll('#itemsBody .desc-input').forEach(input => {
-                    combinedDesc += " " + input.value.toLowerCase();
-                });
-
-                const isYasin = combinedDesc.includes("yasin");
-                const isSablonKaosDanBahan = combinedDesc.includes("sablon kaos") && combinedDesc.includes("bahan");
-
-                let minPersen = 50;
-                if (isYasin || isSablonKaosDanBahan) {
-                    minPersen = 75;
-                }
-
-                const minNominalDP = (minPersen / 100) * globalTotal;
-
-                if (dpValue < minNominalDP) {
-                    dpValue = minNominalDP;
-                    dpInput.value = dpValue.toLocaleString('id-ID');
-                }
-            }
-            // --- END DETEKSI & KOREKSI MINIMAL DP ---
-
+            
             globalDP = dpValue;
             globalSisa = globalTotal - dpValue;
             
